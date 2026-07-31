@@ -156,12 +156,3 @@ body {
   background: #262626;
   border-radius: 10px;
 }
-
-.habit-grid-cell {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.habit-grid-cell:hover {
-  transform: scale(1.1);
-  z-index: 10;
-}

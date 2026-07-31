@@ -1,13 +1,9 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { getTodayKey, addDays } from "@/lib/date";
-import {
-  getDefaultHabitColor,
-  getDefaultHabitIcon,
-} from "@/lib/habit-stats";
 import { generateId } from "@/lib/id";
 import { calculateHabitStreak } from "@/lib/habit-streak";
-import type { Habit, HabitCompletionRecord, HabitInput, HabitUpdate } from "@/types";
+import type { Habit, HabitCompletionRecord, HabitInput } from "@/types";
 
 const SEED_HABITS: Habit[] = [
   {
@@ -38,7 +34,7 @@ const SEED_HABITS: Habit[] = [
     createdAt: new Date().toISOString(),
     category: "Health",
     color: "#10b981",
-    icon: "monitor_heart",
+    icon: "fitness_center",
   },
   {
     id: "habit-4",
@@ -58,7 +54,7 @@ const SEED_HABITS: Habit[] = [
     createdAt: new Date().toISOString(),
     category: "Mindfulness",
     color: "#00bd85",
-    icon: "edit_note",
+    icon: "self_improvement",
   },
 ];
 
@@ -86,11 +82,11 @@ interface HabitState {
   completions: HabitCompletionRecord[];
   lastResetDate: string;
   toggleHabit: (id: string) => void;
-  toggleCompletionForDate: (habitId: string, date: string) => void;
-  addHabit: (input: HabitInput) => void;
-  updateHabit: (id: string, updates: HabitUpdate) => void;
-  deleteHabit: (id: string) => void;
   resetDailyCompletions: () => void;
+  addHabit: (input: HabitInput) => void;
+  updateHabit: (id: string, input: HabitInput) => void;
+  deleteHabit: (id: string) => void;
+  toggleCompletionForDate: (habitId: string, date: string) => void;
 }
 
 function withRecalculatedStreaks(
@@ -111,96 +107,38 @@ export const useHabitStore = create<HabitState>()(
       lastResetDate: getTodayKey(),
 
       toggleHabit: (id) => {
-        get().toggleCompletionForDate(id, getTodayKey());
-      },
-
-      toggleCompletionForDate: (habitId, date) => {
         const today = getTodayKey();
         const { habits, completions } = get();
-        const exists = completions.some(
-          (entry) => entry.habitId === habitId && entry.date === date,
-        );
+        const habit = habits.find((entry) => entry.id === id);
 
-        const nextCompletions = exists
-          ? completions.filter(
-              (entry) => !(entry.habitId === habitId && entry.date === date),
-            )
-          : [...completions, { habitId, date }];
+        if (!habit) {
+          return;
+        }
 
-        const nextHabits = habits.map((habit) => {
-          if (habit.id !== habitId) {
-            return habit;
+        let nextCompletions = [...completions];
+
+        if (habit.completedToday) {
+          nextCompletions = nextCompletions.filter(
+            (entry) => !(entry.habitId === id && entry.date === today),
+          );
+        } else {
+          nextCompletions.push({ habitId: id, date: today });
+        }
+
+        const nextHabits = habits.map((entry) => {
+          if (entry.id !== id) {
+            return entry;
           }
 
-          if (date === today) {
-            return { ...habit, completedToday: !exists };
-          }
-
-          return habit;
+          return {
+            ...entry,
+            completedToday: !entry.completedToday,
+          };
         });
 
         set({
           habits: withRecalculatedStreaks(nextHabits, nextCompletions),
           completions: nextCompletions,
-        });
-      },
-
-      addHabit: (input) => {
-        const trimmed = input.title.trim();
-        if (!trimmed) {
-          return;
-        }
-
-        const category = input.category.trim() || "Growth";
-        const newHabit: Habit = {
-          id: generateId(),
-          title: trimmed,
-          completedToday: false,
-          streak: 0,
-          createdAt: new Date().toISOString(),
-          category,
-          color: input.color || getDefaultHabitColor(category),
-          icon: input.icon || getDefaultHabitIcon(category),
-        };
-
-        set((state) => ({
-          habits: [...state.habits, newHabit],
-        }));
-      },
-
-      updateHabit: (id, updates) => {
-        set((state) => ({
-          habits: state.habits.map((habit) => {
-            if (habit.id !== id) {
-              return habit;
-            }
-
-            const nextCategory = updates.category?.trim() || habit.category;
-
-            return {
-              ...habit,
-              ...updates,
-              title: updates.title?.trim() || habit.title,
-              category: nextCategory,
-              color: updates.color ?? habit.color,
-              icon: updates.icon ?? habit.icon,
-            };
-          }),
-        }));
-      },
-
-      deleteHabit: (id) => {
-        set((state) => {
-          const nextCompletions = state.completions.filter(
-            (entry) => entry.habitId !== id,
-          );
-
-          const nextHabits = state.habits.filter((habit) => habit.id !== id);
-
-          return {
-            habits: withRecalculatedStreaks(nextHabits, nextCompletions),
-            completions: nextCompletions,
-          };
         });
       },
 
@@ -218,6 +156,92 @@ export const useHabitStore = create<HabitState>()(
             habits.map((habit) => ({ ...habit, completedToday: false })),
             completions,
           ),
+        });
+      },
+
+      addHabit: (input) => {
+        const { habits, completions } = get();
+        const newHabit: Habit = {
+          id: generateId(),
+          title: input.title,
+          category: input.category,
+          color: input.color,
+          icon: input.icon,
+          completedToday: false,
+          streak: 0,
+          createdAt: new Date().toISOString(),
+        };
+        const nextHabits = [...habits, newHabit];
+        set({
+          habits: withRecalculatedStreaks(nextHabits, completions),
+        });
+      },
+
+      updateHabit: (id, input) => {
+        const { habits, completions } = get();
+        const nextHabits = habits.map((habit) => {
+          if (habit.id !== id) {
+            return habit;
+          }
+          return {
+            ...habit,
+            title: input.title,
+            category: input.category,
+            color: input.color,
+            icon: input.icon,
+          };
+        });
+        set({
+          habits: withRecalculatedStreaks(nextHabits, completions),
+        });
+      },
+
+      deleteHabit: (id) => {
+        const { habits, completions } = get();
+        const nextHabits = habits.filter((habit) => habit.id !== id);
+        const nextCompletions = completions.filter((entry) => entry.habitId !== id);
+        set({
+          habits: withRecalculatedStreaks(nextHabits, nextCompletions),
+          completions: nextCompletions,
+        });
+      },
+
+      toggleCompletionForDate: (habitId, date) => {
+        const today = getTodayKey();
+        const { habits, completions } = get();
+        const habit = habits.find((entry) => entry.id === habitId);
+
+        if (!habit) {
+          return;
+        }
+
+        const isCompleted = completions.some(
+          (entry) => entry.habitId === habitId && entry.date === date,
+        );
+
+        let nextCompletions = [...completions];
+        if (isCompleted) {
+          nextCompletions = nextCompletions.filter(
+            (entry) => !(entry.habitId === habitId && entry.date === date),
+          );
+        } else {
+          nextCompletions.push({ habitId, date });
+        }
+
+        const nextHabits = habits.map((entry) => {
+          if (entry.id !== habitId) {
+            return entry;
+          }
+          const completedToday = date === today ? !isCompleted : entry.completedToday;
+          return {
+            ...entry,
+            completedToday,
+          };
+        });
+
+        set({
+          habits: withRecalculatedStreaks(nextHabits, nextCompletions),
+          completions: nextCompletions,
         });
       },
     }),

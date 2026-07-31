@@ -9,9 +9,12 @@ export interface Habit {
   icon: string;
 }
 
-export type HabitInput = Pick<Habit, "title" | "category" | "color" | "icon">;
-
-export type HabitUpdate = Partial<HabitInput>;
+export interface HabitInput {
+  title: string;
+  category: string;
+  color: string;
+  icon: string;
+}
 
 export interface HabitCompletionRecord {
   habitId: string;

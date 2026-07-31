@@ -1,0 +1,708 @@
+"use client";
+
+import { useMemo } from "react";
+import Link from "next/link";
+import { useHabitStore } from "@/store/habit-store";
+import { useTaskStore } from "@/store/task-store";
+import { useGoalStore } from "@/store/goal-store";
+import { useActivityStore } from "@/store/activity-store";
+import { useStoreHydration } from "@/hooks/use-store-hydration";
+import { generateHeatmapGrid } from "@/lib/heatmap";
+import { calculateActivityStreak } from "@/lib/streak";
+import { calculateProductivityScore } from "@/lib/productivity";
+import { calculateGlobalLongestStreak } from "@/lib/habit-stats";
+
+const NAV_ITEMS = [
+  { href: "/", label: "Dashboard", icon: "dashboard", active: false },
+  { href: "/habits", label: "Habits", icon: "repeat", active: false },
+  { href: "/planner", label: "Planner", icon: "event_note", active: false },
+  { href: "/goals", label: "Goals", icon: "emoji_events", active: false },
+  { href: "/analytics", label: "Stats", icon: "query_stats", active: true },
+  { href: "#", label: "Health", icon: "favorite", active: false },
+  { href: "#", label: "Coding", icon: "code", active: false },
+  { href: "#", label: "Settings", icon: "settings", active: false },
+] as const;
+
+export default function AnalyticsPage() {
+  const hydrated = useStoreHydration();
+
+  // Stores
+  const habits = useHabitStore((state) => state.habits);
+  const completions = useHabitStore((state) => state.completions);
+  const tasks = useTaskStore((state) => state.tasks);
+  const goals = useGoalStore((state) => state.goals);
+  const activityByDate = useActivityStore((state) => state.activityByDate);
+
+  // ----------------------------------------------------
+  // METRICS CALCULATIONS
+  // ----------------------------------------------------
+
+  // 1. Habit Metrics
+  const totalHabits = habits.length;
+  const completedHabitsToday = habits.filter((h) => h.completedToday).length;
+  const pendingHabitsToday = totalHabits - completedHabitsToday;
+  const habitCompletionRate =
+    totalHabits === 0 ? 0 : Math.round((completedHabitsToday / totalHabits) * 100);
+  const currentHabitStreak = useMemo(() => {
+    if (habits.length === 0) return 0;
+    return Math.max(...habits.map((h) => h.streak), 0);
+  }, [habits]);
+  const longestHabitStreak = useMemo(
+    () => calculateGlobalLongestStreak(habits, completions),
+    [habits, completions],
+  );
+
+  // 2. Task Metrics
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter((t) => t.completed).length;
+  const pendingTasks = totalTasks - completedTasks;
+  const taskCompletionRate =
+    totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+
+  const p1TasksCount = tasks.filter((t) => t.priority === "P1" && !t.completed).length;
+  const p2TasksCount = tasks.filter((t) => t.priority === "P2" && !t.completed).length;
+  const p3TasksCount = tasks.filter((t) => t.priority === "P3" && !t.completed).length;
+
+  // 3. Goal Metrics
+  const totalGoals = goals.length;
+  const completedGoals = goals.filter((g) => g.completed).length;
+  const activeGoals = totalGoals - completedGoals;
+  const averageGoalProgress =
+    totalGoals === 0
+      ? 0
+      : Math.round(goals.reduce((sum, g) => sum + g.progress, 0) / totalGoals);
+
+  // 4. Overall Productivity
+  const activeStreak = useMemo(
+    () => calculateActivityStreak(activityByDate),
+    [activityByDate],
+  );
+
+  const focusTimeMinutes = useMemo(
+    () => completedTasks * 27 + completedHabitsToday * 6,
+    [completedTasks, completedHabitsToday],
+  );
+
+  const focusTimeHours = useMemo(() => {
+    const hours = focusTimeMinutes / 60;
+    return Number.isInteger(hours) ? `${hours}` : `${hours.toFixed(1)}`;
+  }, [focusTimeMinutes]);
+
+  const productivity = useMemo(
+    () =>
+      calculateProductivityScore({
+        completedTasks,
+        totalTasks,
+        completedHabits: completedHabitsToday,
+        totalHabits,
+        currentStreak: activeStreak,
+        focusTimeMinutes,
+      }),
+    [
+      completedTasks,
+      totalTasks,
+      completedHabitsToday,
+      totalHabits,
+      activeStreak,
+      focusTimeMinutes,
+    ],
+  );
+
+  const successRate = useMemo(() => {
+    const totalItems = totalHabits + totalTasks;
+    if (totalItems === 0) return 0;
+    return Math.round(((completedHabitsToday + completedTasks) / totalItems) * 100);
+  }, [completedHabitsToday, completedTasks, totalHabits, totalTasks]);
+
+  // ----------------------------------------------------
+  // VISUALIZATIONS GENERATORS
+  // ----------------------------------------------------
+
+  // Heatmap Cells
+  const heatmapColumns = useMemo(
+    () => generateHeatmapGrid(activityByDate),
+    [activityByDate],
+  );
+
+  // Radar points for Life Balance (Radar size 100x100, center 50,50)
+  const radarPoints = useMemo(() => {
+    // Health (Habits completion)
+    const rHealth = 15 + 30 * (habitCompletionRate / 100);
+    // Coding (Tasks completion)
+    const rCoding = 15 + 30 * (taskCompletionRate / 100);
+    // Social / Active Streak
+    const rSocial = 15 + 30 * (Math.min(activeStreak, 30) / 30);
+    // Growth (Goals completion)
+    const rGrowth = 15 + 30 * (averageGoalProgress / 100);
+
+    // Points: Up, Right, Down, Left
+    return `${50},${50 - rHealth} ${50 + rCoding},${50} ${50},${50 + rSocial} ${50 - rGrowth},${50}`;
+  }, [habitCompletionRate, taskCompletionRate, activeStreak, averageGoalProgress]);
+
+  // Productivity Trend over the last 9 days
+  const trendChartData = useMemo(() => {
+    const today = new Date();
+    return Array.from({ length: 9 }, (_, i) => {
+      const d = new Date();
+      d.setDate(today.getDate() - (8 - i));
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const key = `${year}-${month}-${day}`;
+
+      const level = activityByDate[key] ?? 1; // Default to level 1 for baseline display
+      const score = level * 25; // 0 to 100
+      const x = i * 12.5;
+      const y = 200 - (score / 100) * 130; // Max score gives y=70, min y=200
+
+      const label = d.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+
+      return { x, y, label };
+    });
+  }, [activityByDate]);
+
+  const trendLinePath = useMemo(() => {
+    return `M ${trendChartData.map((p) => `${p.x},${p.y}`).join(" L ")}`;
+  }, [trendChartData]);
+
+  const trendAreaPath = useMemo(() => {
+    return `M 0,256 L ${trendChartData.map((p) => `${p.x},${p.y}`).join(" L ")} L 100,256 Z`;
+  }, [trendChartData]);
+
+  if (!hydrated) {
+    return null;
+  }
+
+  return (
+    <div className="bg-surface-container-lowest text-on-surface font-body-md selection:bg-primary/30 min-h-screen">
+      {/* Sidebar Navigation */}
+      <aside className="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest border-r border-outline-variant/20 flex flex-col py-lg px-md gap-sm hidden md:flex z-50">
+        <div className="px-md mb-lg">
+          <Link href="/" className="font-headline-md text-headline-md text-primary tracking-tighter">
+            Geetz OS
+          </Link>
+          <p className="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest mt-1 opacity-70">
+            Elite Performance
+          </p>
+        </div>
+        <nav className="flex-1 flex flex-col gap-1 no-scrollbar overflow-y-auto">
+          {NAV_ITEMS.map((item) => {
+            const className = item.active
+              ? "flex items-center gap-md px-md py-sm rounded-lg bg-secondary-container/20 text-primary border-r-2 border-primary active:translate-x-1 transition-transform font-label-md font-bold"
+              : "flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 font-label-md";
+
+            const content = (
+              <>
+                <span className="material-symbols-outlined">{item.icon}</span>
+                {item.label}
+              </>
+            );
+
+            if (item.href === "#") {
+              return (
+                <a key={item.label} className={className} href={item.href}>
+                  {content}
+                </a>
+              );
+            }
+
+            return (
+              <Link key={item.label} className={className} href={item.href}>
+                {content}
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="mt-auto border-t border-outline-variant/20 pt-md">
+          <Link
+            className="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 font-label-md"
+            href="/"
+          >
+            <span className="material-symbols-outlined">logout</span>
+            Logout
+          </Link>
+        </div>
+      </aside>
+
+      {/* Main Canvas */}
+      <main className="md:ml-64 min-h-screen">
+        {/* Top App Bar */}
+        <header className="fixed top-0 right-0 left-0 md:left-64 h-16 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 px-lg flex justify-between items-center z-40">
+          <div className="flex items-center gap-md">
+            <h2 className="font-headline-md text-headline-md text-primary font-bold">
+              Performance Insights
+            </h2>
+            <div className="hidden sm:flex gap-sm items-center bg-surface-container-low px-sm py-1 rounded-full border border-outline-variant/20">
+              <span className="w-2 h-2 rounded-full bg-primary active-glow" />
+              <span className="text-[10px] font-label-md text-primary font-bold">
+                LIVE ENGINE
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-lg">
+            <div className="hidden lg:flex items-center gap-sm text-on-surface-variant text-label-md uppercase tracking-wider font-bold">
+              <span className="material-symbols-outlined text-[18px]">
+                calendar_month
+              </span>
+              <span>Performance Year 2026</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <div className="pt-24 pb-12 px-lg max-w-7xl mx-auto space-y-md">
+          {/* Hero Stats Row */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-md">
+            <div className="glass-card rounded-[18px] p-lg flex flex-col justify-between h-32">
+              <span className="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider font-bold">
+                Productivity Score
+              </span>
+              <div className="flex items-baseline gap-2">
+                <span className="font-display text-4xl text-primary font-bold">
+                  {productivity.score}
+                </span>
+                <span className="text-label-md text-primary/60 font-bold">LIVE</span>
+              </div>
+            </div>
+            <div className="glass-card rounded-[18px] p-lg flex flex-col justify-between h-32">
+              <span className="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider font-bold">
+                Active Streak
+              </span>
+              <div className="flex items-baseline gap-2">
+                <span className="font-display text-4xl text-on-surface font-bold">
+                  {activeStreak}
+                </span>
+                <span className="text-label-md text-on-surface-variant font-bold">
+                  {activeStreak === 1 ? "DAY" : "DAYS"}
+                </span>
+              </div>
+            </div>
+            <div className="glass-card rounded-[18px] p-lg flex flex-col justify-between h-32">
+              <span className="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider font-bold">
+                Focus Hours
+              </span>
+              <div className="flex items-baseline gap-2">
+                <span className="font-display text-4xl text-on-surface font-bold">
+                  {focusTimeHours}
+                </span>
+                <span className="text-label-md text-on-surface-variant font-bold">
+                  HOURS
+                </span>
+              </div>
+            </div>
+            <div className="glass-card rounded-[18px] p-lg flex flex-col justify-between h-32 border-primary/20">
+              <span className="text-label-md font-label-md text-primary uppercase tracking-wider font-bold">
+                Success Rate
+              </span>
+              <div className="flex items-baseline gap-2">
+                <span className="font-display text-4xl text-primary font-bold">
+                  {successRate}%
+                </span>
+                <span className="text-label-md text-primary/60 font-bold">
+                  COMPLETION
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bento Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-md">
+            {/* Heatmap Grid */}
+            <div className="lg:col-span-8 glass-card rounded-[18px] p-lg">
+              <div className="flex justify-between items-center mb-lg">
+                <h3 className="font-headline-md text-headline-md text-on-surface font-bold">
+                  Contribution Heatmap
+                </h3>
+                <div className="flex gap-2 text-[10px] text-on-surface-variant font-label-md items-center">
+                  <span>Less</span>
+                  <div className="w-3 h-3 bg-surface-container-high" />
+                  <div className="w-3 h-3 bg-primary/20" />
+                  <div className="w-3 h-3 bg-primary/50" />
+                  <div className="w-3 h-3 bg-primary/80" />
+                  <div className="w-3 h-3 bg-primary" />
+                  <span>More</span>
+                </div>
+              </div>
+              <div className="overflow-x-auto no-scrollbar">
+                <div className="grid grid-flow-col grid-rows-7 gap-1 min-w-[700px]">
+                  {heatmapColumns.flatMap((col, colIndex) =>
+                    col.cells.map((cell, cellIndex) => (
+                      <div
+                        key={`${colIndex}-${cellIndex}`}
+                        className={`heatmap-cell ${cell.className} w-3 h-3`}
+                        title={`${cell.date}: level ${cell.level}`}
+                      />
+                    )),
+                  )}
+                </div>
+                <div className="flex justify-between mt-2 px-1 text-[10px] font-label-md text-on-surface-variant opacity-60">
+                  <span>Jan</span>
+                  <span>Feb</span>
+                  <span>Mar</span>
+                  <span>Apr</span>
+                  <span>May</span>
+                  <span>Jun</span>
+                  <span>Jul</span>
+                  <span>Aug</span>
+                  <span>Sep</span>
+                  <span>Oct</span>
+                  <span>Nov</span>
+                  <span>Dec</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Radar Balance Chart */}
+            <div className="lg:col-span-4 glass-card rounded-[18px] p-lg flex flex-col">
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-lg font-bold">
+                Life Balance
+              </h3>
+              <div className="relative flex-1 flex items-center justify-center py-md min-h-[180px]">
+                <svg className="w-full h-full max-h-[220px]" viewBox="0 0 100 100">
+                  <circle
+                    className="text-outline-variant/20"
+                    cx="50"
+                    cy="50"
+                    fill="none"
+                    r="45"
+                    stroke="currentColor"
+                    strokeWidth="0.5"
+                  />
+                  <circle
+                    className="text-outline-variant/20"
+                    cx="50"
+                    cy="50"
+                    fill="none"
+                    r="30"
+                    stroke="currentColor"
+                    strokeWidth="0.5"
+                  />
+                  <circle
+                    className="text-outline-variant/20"
+                    cx="50"
+                    cy="50"
+                    fill="none"
+                    r="15"
+                    stroke="currentColor"
+                    strokeWidth="0.5"
+                  />
+                  <line
+                    className="text-outline-variant/20"
+                    stroke="currentColor"
+                    strokeWidth="0.5"
+                    x1="50"
+                    x2="50"
+                    y1="5"
+                    y2="95"
+                  />
+                  <line
+                    className="text-outline-variant/20"
+                    stroke="currentColor"
+                    strokeWidth="0.5"
+                    x1="5"
+                    x2="95"
+                    y1="50"
+                    y2="50"
+                  />
+                  <polygon
+                    fill="rgba(78, 222, 163, 0.2)"
+                    points={radarPoints}
+                    stroke="#4edea3"
+                    strokeWidth="1.5"
+                  />
+                  <text
+                    className="text-[6px] fill-on-surface-variant font-label-md uppercase font-bold"
+                    textAnchor="middle"
+                    x="50"
+                    y="10"
+                  >
+                    Habits
+                  </text>
+                  <text
+                    className="text-[6px] fill-on-surface-variant font-label-md uppercase font-bold"
+                    textAnchor="end"
+                    x="94"
+                    y="52"
+                  >
+                    Tasks
+                  </text>
+                  <text
+                    className="text-[6px] fill-on-surface-variant font-label-md uppercase font-bold"
+                    textAnchor="middle"
+                    x="50"
+                    y="96"
+                  >
+                    Streak
+                  </text>
+                  <text
+                    className="text-[6px] fill-on-surface-variant font-label-md uppercase font-bold"
+                    textAnchor="start"
+                    x="6"
+                    y="52"
+                  >
+                    Goals
+                  </text>
+                </svg>
+              </div>
+              <div className="grid grid-cols-2 gap-sm mt-md">
+                <div className="flex items-center gap-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  <span className="text-[10px] font-label-md text-on-surface-variant uppercase font-bold">
+                    Habits: {(habitCompletionRate / 10).toFixed(1)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary/70" />
+                  <span className="text-[10px] font-label-md text-on-surface-variant uppercase font-bold">
+                    Tasks: {(taskCompletionRate / 10).toFixed(1)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                  <span className="text-[10px] font-label-md text-on-surface-variant uppercase font-bold">
+                    Goals: {(averageGoalProgress / 10).toFixed(1)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  <span className="text-[10px] font-label-md text-on-surface-variant uppercase font-bold">
+                    Streak: {activeStreak}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Productivity Trend Chart */}
+            <div className="lg:col-span-12 glass-card rounded-[18px] p-lg">
+              <div className="flex justify-between items-end mb-xl">
+                <div>
+                  <h3 className="font-headline-md text-headline-md text-on-surface font-bold">
+                    Productivity Cycles
+                  </h3>
+                  <p className="text-body-md text-on-surface-variant">
+                    Performance variance over the last 9 days.
+                  </p>
+                </div>
+              </div>
+              <div className="h-64 w-full relative">
+                <svg
+                  className="w-full h-full overflow-visible"
+                  viewBox="0 0 100 256"
+                  preserveAspectRatio="none"
+                  aria-hidden="true"
+                >
+                  <defs>
+                    <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0%" stopColor="#4edea3" stopOpacity="0.3" />
+                      <stop offset="100%" stopColor="#4edea3" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <line
+                    stroke="rgba(255,255,255,0.05)"
+                    strokeWidth="1"
+                    x1="0"
+                    x2="100%"
+                    y1="20%"
+                    y2="20%"
+                  />
+                  <line
+                    stroke="rgba(255,255,255,0.05)"
+                    strokeWidth="1"
+                    x1="0"
+                    x2="100%"
+                    y1="40%"
+                    y2="40%"
+                  />
+                  <line
+                    stroke="rgba(255,255,255,0.05)"
+                    strokeWidth="1"
+                    x1="0"
+                    x2="100%"
+                    y1="60%"
+                    y2="60%"
+                  />
+                  <line
+                    stroke="rgba(255,255,255,0.05)"
+                    strokeWidth="1"
+                    x1="0"
+                    x2="100%"
+                    y1="80%"
+                    y2="80%"
+                  />
+                  <path d={trendAreaPath} fill="url(#chartGradient)" />
+                  <path
+                    d={trendLinePath}
+                    fill="none"
+                    stroke="#4edea3"
+                    strokeWidth="2.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                </svg>
+                <div className="absolute -bottom-6 w-full flex justify-between text-[10px] font-label-md text-on-surface-variant font-bold uppercase select-none">
+                  {trendChartData.map((p, index) => (
+                    <span key={index}>{p.label}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Metrics Breakdown Panels */}
+            <div className="lg:col-span-4 glass-card rounded-[18px] overflow-hidden border-primary/20 flex flex-col justify-between">
+              <div className="p-lg bg-primary/5 border-b border-primary/10">
+                <h4 className="font-label-md text-[14px] text-primary uppercase font-bold tracking-widest">
+                  Habits Analytics
+                </h4>
+              </div>
+              <div className="p-lg space-y-md flex-1 flex flex-col justify-center">
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-body-md">
+                    Total Habits
+                  </span>
+                  <span className="font-code font-bold">{totalHabits}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-body-md">
+                    Completed Today
+                  </span>
+                  <span className="font-code font-bold text-primary">
+                    {completedHabitsToday}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-body-md">
+                    Pending Today
+                  </span>
+                  <span className="font-code font-bold">{pendingHabitsToday}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-body-md">
+                    Streak (Current / Max)
+                  </span>
+                  <span className="font-code font-bold">
+                    {currentHabitStreak} / {longestHabitStreak}
+                  </span>
+                </div>
+                <div className="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+                  <div
+                    className="bg-primary h-full transition-all duration-500"
+                    style={{ width: `${habitCompletionRate}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-4 glass-card rounded-[18px] overflow-hidden border-primary/20 flex flex-col justify-between">
+              <div className="p-lg bg-primary/5 border-b border-primary/10">
+                <h4 className="font-label-md text-[14px] text-primary uppercase font-bold tracking-widest">
+                  Tasks Analytics
+                </h4>
+              </div>
+              <div className="p-lg space-y-md flex-1 flex flex-col justify-center">
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-body-md">
+                    Total Tasks
+                  </span>
+                  <span className="font-code font-bold">{totalTasks}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-body-md">
+                    Completed Tasks
+                  </span>
+                  <span className="font-code font-bold text-primary">
+                    {completedTasks}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-body-md">
+                    Pending Tasks
+                  </span>
+                  <span className="font-code font-bold">{pendingTasks}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-body-md">
+                    Priority Distribution
+                  </span>
+                  <span className="font-code font-bold">
+                    P1:{p1TasksCount} | P2:{p2TasksCount} | P3:{p3TasksCount}
+                  </span>
+                </div>
+                <div className="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+                  <div
+                    className="bg-primary h-full transition-all duration-500"
+                    style={{ width: `${taskCompletionRate}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-4 glass-card rounded-[18px] overflow-hidden border-primary/20 flex flex-col justify-between">
+              <div className="p-lg bg-primary/5 border-b border-primary/10">
+                <h4 className="font-label-md text-[14px] text-primary uppercase font-bold tracking-widest">
+                  Goals Analytics
+                </h4>
+              </div>
+              <div className="p-lg space-y-md flex-1 flex flex-col justify-center">
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-body-md">
+                    Total Goals
+                  </span>
+                  <span className="font-code font-bold">{totalGoals}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-body-md">
+                    Active Goals
+                  </span>
+                  <span className="font-code font-bold text-primary">{activeGoals}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-body-md">
+                    Completed Goals
+                  </span>
+                  <span className="font-code font-bold">{completedGoals}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-body-md">
+                    Average Progress
+                  </span>
+                  <span className="font-code font-bold">{averageGoalProgress}%</span>
+                </div>
+                <div className="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+                  <div
+                    className="bg-primary h-full transition-all duration-500"
+                    style={{ width: `${averageGoalProgress}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Mobile Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface/90 backdrop-blur-xl border-t border-outline-variant/30 flex justify-around items-center z-50">
+        <Link
+          className="flex flex-col items-center gap-1 text-on-surface-variant font-label-md"
+          href="/"
+        >
+          <span className="material-symbols-outlined">dashboard</span>
+          <span className="text-[10px]">Home</span>
+        </Link>
+        <Link
+          className="flex flex-col items-center gap-1 text-primary font-label-md"
+          href="/analytics"
+        >
+          <span
+            className="material-symbols-outlined"
+            style={{ fontVariationSettings: "'FILL' 1" }}
+          >
+            query_stats
+          </span>
+          <span className="text-[10px]">Stats</span>
+        </Link>
+      </nav>
+    </div>
+  );
+}

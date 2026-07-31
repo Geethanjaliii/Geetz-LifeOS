@@ -46,7 +46,14 @@ function getNextOpenPriority(tasks: Task[]): TaskPriority {
 interface TaskState {
   tasks: Task[];
   toggleTask: (id: string) => void;
-  addTask: (title: string) => void;
+  addTask: (
+    title: string,
+    priority?: TaskPriority,
+    dueTime?: string,
+    description?: string,
+  ) => void;
+  updateTask: (id: string, updates: Partial<Omit<Task, "id">>) => void;
+  deleteTask: (id: string) => void;
 }
 
 export const useTaskStore = create<TaskState>()(
@@ -78,7 +85,7 @@ export const useTaskStore = create<TaskState>()(
         }));
       },
 
-      addTask: (title) => {
+      addTask: (title, priority, dueTime, description) => {
         const trimmed = title.trim();
         if (!trimmed) {
           return;
@@ -89,10 +96,31 @@ export const useTaskStore = create<TaskState>()(
           id: generateId(),
           title: trimmed,
           completed: false,
-          priority: getNextOpenPriority(tasks),
+          priority: priority ?? getNextOpenPriority(tasks),
+          dueTime,
+          description,
         };
 
         set({ tasks: [...tasks, newTask] });
+      },
+
+      updateTask: (id, updates) => {
+        const { tasks } = get();
+        const nextTasks = tasks.map((task) => {
+          if (task.id !== id) {
+            return task;
+          }
+          return {
+            ...task,
+            ...updates,
+          };
+        });
+        set({ tasks: nextTasks });
+      },
+
+      deleteTask: (id) => {
+        const { tasks } = get();
+        set({ tasks: tasks.filter((task) => task.id !== id) });
       },
     }),
     {

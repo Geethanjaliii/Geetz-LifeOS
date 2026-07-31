@@ -1,4 +1,4 @@
-import { addDays, getTodayKey, toDateKey } from "./date";
+import { addDays, toDateKey } from "./date";
 import type { Habit, HabitCompletionRecord } from "@/types";
 
 export function isHabitCompletedOnDate(
