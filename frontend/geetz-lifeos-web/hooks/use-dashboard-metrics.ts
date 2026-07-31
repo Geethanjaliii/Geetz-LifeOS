@@ -13,16 +13,15 @@ import {
 } from "@/store/habit-store";
 import {
   selectCompletedTaskCount,
-  selectTaskCompletionPercent,
   selectTotalTaskCount,
   useTaskStore,
 } from "@/store/task-store";
 import { useActivityStore } from "@/store/activity-store";
+import { useGoalStore } from "@/store/goal-store";
+import { getTodayKey } from "@/lib/date";
 import { useStoreHydration } from "./use-store-hydration";
 
 const PROGRESS_CIRCUMFERENCE = 628;
-const FOCUS_MINUTES_PER_TASK = 27;
-const FOCUS_MINUTES_PER_HABIT = 6;
 
 export function useDashboardSync(): void {
   const tasks = useTaskStore((state) => state.tasks);
@@ -41,22 +40,31 @@ export function useDashboardMetrics() {
   const hydrated = useStoreHydration();
   const tasks = useTaskStore((state) => state.tasks);
   const habits = useHabitStore((state) => state.habits);
+  const goals = useGoalStore((state) => state.goals);
   const activityByDate = useActivityStore((state) => state.activityByDate);
+  const focusSessionsByDate = useActivityStore((state) => state.focusSessionsByDate) || {};
   const sessionStartScore = useRef<number | null>(null);
 
   const completedTasks = selectCompletedTaskCount(tasks);
   const totalTasks = selectTotalTaskCount(tasks);
   const completedHabits = selectCompletedHabitCount(habits);
   const totalHabits = selectTotalHabitCount(habits);
-  const taskCompletionPercent = selectTaskCompletionPercent(tasks);
+
+  const totalItems = totalTasks + totalHabits;
+  const completedItems = completedTasks + completedHabits;
+  const combinedProgressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
   const currentStreak = calculateActivityStreak(activityByDate);
 
-  const focusTimeMinutes = useMemo(
-    () =>
-      completedTasks * FOCUS_MINUTES_PER_TASK +
-      completedHabits * FOCUS_MINUTES_PER_HABIT,
-    [completedTasks, completedHabits],
-  );
+  const today = getTodayKey();
+  const todaySessions = focusSessionsByDate[today] ?? 0;
+  const focusTimeMinutes = todaySessions * 25;
+
+  const averageGoalProgress = useMemo(() => {
+    if (goals.length === 0) return 0;
+    const totalProgress = goals.reduce((sum, goal) => sum + goal.progress, 0);
+    return totalProgress / goals.length;
+  }, [goals]);
 
   const productivity = useMemo(
     () =>
@@ -67,6 +75,7 @@ export function useDashboardMetrics() {
         totalHabits,
         currentStreak,
         focusTimeMinutes,
+        averageGoalProgress,
       }),
     [
       completedTasks,
@@ -75,6 +84,7 @@ export function useDashboardMetrics() {
       totalHabits,
       currentStreak,
       focusTimeMinutes,
+      averageGoalProgress,
     ],
   );
 
@@ -85,9 +95,9 @@ export function useDashboardMetrics() {
   }, [hydrated, productivity.score]);
 
   const progressStrokeOffset = useMemo(() => {
-    const progress = taskCompletionPercent / 100;
+    const progress = combinedProgressPercent / 100;
     return PROGRESS_CIRCUMFERENCE * (1 - progress);
-  }, [taskCompletionPercent]);
+  }, [combinedProgressPercent]);
 
   const heatmapColumns = useMemo(
     () => generateHeatmapGrid(activityByDate),
@@ -101,7 +111,7 @@ export function useDashboardMetrics() {
 
   const focusTimeHours = useMemo(() => {
     const hours = focusTimeMinutes / 60;
-    return Number.isInteger(hours) ? `${hours}h` : `${hours.toFixed(1)}h`;
+    return `${hours.toFixed(1)}h`;
   }, [focusTimeMinutes]);
 
   return {
@@ -109,7 +119,7 @@ export function useDashboardMetrics() {
     habits,
     completedTasks,
     totalTasks,
-    taskCompletionPercent,
+    taskCompletionPercent: combinedProgressPercent,
     progressStrokeOffset,
     productivityScore: productivity.score,
     productivityLabel: getProductivityLabel(productivity.score),

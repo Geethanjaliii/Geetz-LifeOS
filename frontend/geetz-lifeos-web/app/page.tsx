@@ -5,7 +5,7 @@ import { CurrentStreak } from "@/components/dashboard/current-streak";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { ProductivityScore } from "@/components/dashboard/productivity-score";
 import { ProgressRing } from "@/components/dashboard/progress-ring";
-import { DashboardSidebar } from "@/components/dashboard/sidebar";
+import { Sidebar } from "@/components/sidebar";
 import { DashboardTopBar } from "@/components/dashboard/top-bar";
 import { TopPriorities } from "@/components/dashboard/top-priorities";
 import {
@@ -43,7 +43,7 @@ export default function Home() {
 
   return (
     <>
-      <DashboardSidebar />
+      <Sidebar active="dashboard" />
       <DashboardTopBar dateTime={dateTime} />
 
       <main className="md:ml-[260px] pt-24 px-container-padding pb-xl min-h-screen">

@@ -5,6 +5,7 @@ export interface ProductivityInputs {
   totalHabits: number;
   currentStreak: number;
   focusTimeMinutes: number;
+  averageGoalProgress: number;
 }
 
 export interface ProductivityResult {
@@ -13,12 +14,14 @@ export interface ProductivityResult {
   habitCompletionRate: number;
   streakScore: number;
   focusScore: number;
+  goalScore: number;
 }
 
-const TASK_WEIGHT = 0.35;
-const HABIT_WEIGHT = 0.35;
-const STREAK_WEIGHT = 0.15;
-const FOCUS_WEIGHT = 0.15;
+const TASK_WEIGHT = 0.30;
+const HABIT_WEIGHT = 0.30;
+const GOAL_WEIGHT = 0.20;
+const STREAK_WEIGHT = 0.10;
+const FOCUS_WEIGHT = 0.10;
 const MAX_STREAK_DAYS = 30;
 const MAX_FOCUS_MINUTES = 480;
 
@@ -45,12 +48,16 @@ export function calculateProductivityScore(
     100,
   );
 
-  const score = Math.round(
+  const goalScore = Math.min(Math.max(inputs.averageGoalProgress, 0), 100);
+
+  const rawScore =
     taskCompletionRate * TASK_WEIGHT +
-      habitCompletionRate * HABIT_WEIGHT +
-      streakScore * STREAK_WEIGHT +
-      focusScore * FOCUS_WEIGHT,
-  );
+    habitCompletionRate * HABIT_WEIGHT +
+    goalScore * GOAL_WEIGHT +
+    streakScore * STREAK_WEIGHT +
+    focusScore * FOCUS_WEIGHT;
+
+  const score = Math.min(Math.max(Math.round(rawScore), 0), 100);
 
   return {
     score,
@@ -58,6 +65,7 @@ export function calculateProductivityScore(
     habitCompletionRate,
     streakScore,
     focusScore,
+    goalScore,
   };
 }
 

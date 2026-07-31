@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { getTodayKey, addDays } from "@/lib/date";
+import { getTodayKey } from "@/lib/date";
 import { generateId } from "@/lib/id";
 import { calculateHabitStreak } from "@/lib/habit-streak";
 import type { Habit, HabitCompletionRecord, HabitInput } from "@/types";
@@ -9,8 +9,8 @@ const SEED_HABITS: Habit[] = [
   {
     id: "habit-1",
     title: "Morning deep work block",
-    completedToday: true,
-    streak: 14,
+    completedToday: false,
+    streak: 0,
     createdAt: new Date().toISOString(),
     category: "Focus",
     color: "#4edea3",
@@ -19,8 +19,8 @@ const SEED_HABITS: Habit[] = [
   {
     id: "habit-2",
     title: "Review daily priorities",
-    completedToday: true,
-    streak: 14,
+    completedToday: false,
+    streak: 0,
     createdAt: new Date().toISOString(),
     category: "Planning",
     color: "#45dfa4",
@@ -29,8 +29,8 @@ const SEED_HABITS: Habit[] = [
   {
     id: "habit-3",
     title: "Exercise session",
-    completedToday: true,
-    streak: 10,
+    completedToday: false,
+    streak: 0,
     createdAt: new Date().toISOString(),
     category: "Health",
     color: "#10b981",
@@ -40,7 +40,7 @@ const SEED_HABITS: Habit[] = [
     id: "habit-4",
     title: "Read for 30 minutes",
     completedToday: false,
-    streak: 7,
+    streak: 0,
     createdAt: new Date().toISOString(),
     category: "Learning",
     color: "#6ffbbe",
@@ -49,8 +49,8 @@ const SEED_HABITS: Habit[] = [
   {
     id: "habit-5",
     title: "Evening reflection",
-    completedToday: true,
-    streak: 12,
+    completedToday: false,
+    streak: 0,
     createdAt: new Date().toISOString(),
     category: "Mindfulness",
     color: "#00bd85",
@@ -58,24 +58,7 @@ const SEED_HABITS: Habit[] = [
   },
 ];
 
-function seedHabitCompletions(
-  habits: Habit[],
-  days: number,
-): HabitCompletionRecord[] {
-  const records: HabitCompletionRecord[] = [];
-  let cursor = getTodayKey();
-
-  for (let day = 0; day < days; day += 1) {
-    habits.forEach((habit) => {
-      records.push({ habitId: habit.id, date: cursor });
-    });
-    cursor = addDays(cursor, -1);
-  }
-
-  return records;
-}
-
-const SEED_COMPLETIONS = seedHabitCompletions(SEED_HABITS, 14);
+const SEED_COMPLETIONS: HabitCompletionRecord[] = [];
 
 interface HabitState {
   habits: Habit[];

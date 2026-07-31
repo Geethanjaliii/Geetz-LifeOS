@@ -1,22 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useGoalStore } from "@/store/goal-store";
+import { useActivityStore } from "@/store/activity-store";
 import { useStoreHydration } from "@/hooks/use-store-hydration";
-import type { Goal, GoalInput } from "@/types";
-
-const NAV_ITEMS = [
-  { href: "/", label: "Dashboard", icon: "dashboard", active: false },
-  { href: "/habits", label: "Habits", icon: "repeat", active: false },
-  { href: "/planner", label: "Planner", icon: "event_note", active: false },
-  { href: "/goals", label: "Goals", icon: "emoji_events", active: true },
-  { href: "#", label: "Coding", icon: "terminal", active: false },
-  { href: "#", label: "Learning", icon: "school", active: false },
-  { href: "#", label: "Finance", icon: "payments", active: false },
-  { href: "#", label: "Stats", icon: "query_stats", active: false },
-  { href: "#", label: "Settings", icon: "settings", active: false },
-] as const;
+import { Sidebar } from "@/components/sidebar";
+import { toDateKey } from "@/lib/date";
+import { HEATMAP_LEVEL_CLASSES } from "@/lib/heatmap";
+import { calculateActivityStreak } from "@/lib/streak";
+import type { Goal, GoalInput, ActivityLevel } from "@/types";
 
 function getCategoryIcon(category: string): string {
   const norm = category.toLowerCase();
@@ -36,6 +29,28 @@ export default function GoalsPage() {
   const updateGoal = useGoalStore((state) => state.updateGoal);
   const deleteGoal = useGoalStore((state) => state.deleteGoal);
   const toggleGoalCompletion = useGoalStore((state) => state.toggleGoalCompletion);
+
+  // Activity Store
+  const activityByDate = useActivityStore((state) => state.activityByDate);
+
+  const currentStreak = useMemo(() => calculateActivityStreak(activityByDate), [activityByDate]);
+
+  const activityCells = useMemo(() => {
+    const today = new Date();
+    const cells: { date: string; level: ActivityLevel; className: string }[] = [];
+    for (let index = 20; index >= 0; index -= 1) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - index);
+      const key = toDateKey(date);
+      const level = activityByDate[key] ?? 0;
+      cells.push({
+        date: key,
+        level,
+        className: HEATMAP_LEVEL_CLASSES[level] || "bg-surface-container-high",
+      });
+    }
+    return cells;
+  }, [activityByDate]);
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
@@ -179,47 +194,10 @@ export default function GoalsPage() {
       </nav>
 
       {/* SideNavBar (Hidden on Mobile) */}
-      <aside className="hidden md:flex fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface-container-lowest border-r border-outline-variant/20 flex-col py-lg px-md gap-sm">
-        <div className="px-md mb-md">
-          <h2 className="font-headline-md text-headline-md text-primary">
-            Elite Performance
-          </h2>
-          <p className="text-label-md text-on-surface-variant tracking-wider">
-            SYSTEM ACTIVE
-          </p>
-        </div>
-        <div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar flex-1">
-          {NAV_ITEMS.map((item) => {
-            const className = item.active
-              ? "flex items-center gap-md px-md py-3 rounded-lg bg-secondary-container/20 text-primary border-r-2 border-primary transition-all duration-200 active:translate-x-1 font-label-md text-label-md font-bold"
-              : "flex items-center gap-md px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 active:translate-x-1 font-label-md text-label-md";
-
-            const content = (
-              <>
-                <span className="material-symbols-outlined">{item.icon}</span>
-                {item.label}
-              </>
-            );
-
-            if (item.href === "#") {
-              return (
-                <a key={item.label} className={className} href={item.href}>
-                  {content}
-                </a>
-              );
-            }
-
-            return (
-              <Link key={item.label} className={className} href={item.href}>
-                {content}
-              </Link>
-            );
-          })}
-        </div>
-      </aside>
+      <Sidebar active="goals" />
 
       {/* Main Content Area */}
-      <main className="md:ml-64 pt-24 px-md md:px-xl pb-12">
+      <main className="md:ml-[260px] pt-24 px-md md:px-xl pb-12">
         <header className="mb-xl flex flex-col md:flex-row md:items-end justify-between gap-md">
           <div>
             <p className="text-primary font-label-md text-label-md mb-2">
@@ -476,36 +454,26 @@ export default function GoalsPage() {
               </div>
             </div>
 
-            {/* Global Heatmap (Static matching Stitch) */}
+            {/* Global Heatmap (Dynamic activity tracking) */}
             <div className="glass-card p-lg">
               <h3 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest mb-md">
                 System Activity
               </h3>
               <div className="grid grid-cols-7 gap-[4px]">
-                <div className="w-full aspect-square bg-primary-container rounded-[2px]" />
-                <div className="w-full aspect-square bg-primary-fixed-dim rounded-[2px]" />
-                <div className="w-full aspect-square bg-primary rounded-[2px]" />
-                <div className="w-full aspect-square bg-surface-container-high rounded-[2px]" />
-                <div className="w-full aspect-square bg-primary-fixed-dim rounded-[2px]" />
-                <div className="w-full aspect-square bg-primary rounded-[2px]" />
-                <div className="w-full aspect-square bg-primary-container rounded-[2px]" />
-                <div className="w-full aspect-square bg-surface-container-high rounded-[2px]" />
-                <div className="w-full aspect-square bg-surface-container-high rounded-[2px]" />
-                <div className="w-full aspect-square bg-primary rounded-[2px]" />
-                <div className="w-full aspect-square bg-primary-fixed-dim rounded-[2px]" />
-                <div className="w-full aspect-square bg-surface-container-high rounded-[2px]" />
-                <div className="w-full aspect-square bg-primary-container rounded-[2px]" />
-                <div className="w-full aspect-square bg-primary-container rounded-[2px]" />
-                <div className="w-full aspect-square bg-primary-container rounded-[2px]" />
-                <div className="w-full aspect-square bg-primary rounded-[2px]" />
-                <div className="w-full aspect-square bg-primary-fixed-dim rounded-[2px]" />
-                <div className="w-full aspect-square bg-primary rounded-[2px]" />
-                <div className="w-full aspect-square bg-primary-container rounded-[2px]" />
-                <div className="w-full aspect-square bg-surface-container-high rounded-[2px]" />
-                <div className="w-full aspect-square bg-primary rounded-[2px]" />
+                {activityCells.map((cell) => (
+                  <div
+                    key={cell.date}
+                    className={`w-full aspect-square rounded-[2px] ${cell.className}`}
+                    title={`${cell.date}: Level ${cell.level}`}
+                  />
+                ))}
               </div>
               <p className="mt-md text-[10px] text-on-surface-variant text-center">
-                Consistent elite performance detected for 21 consecutive days.
+                {currentStreak > 0
+                  ? `Consistent elite performance detected for ${currentStreak} consecutive ${
+                      currentStreak === 1 ? "day" : "days"
+                    }.`
+                  : "No active streak logged yet. Complete tasks or habits to build your streak!"}
               </p>
             </div>
           </section>
@@ -514,14 +482,17 @@ export default function GoalsPage() {
 
       {/* ADD/EDIT GOAL DIALOG */}
       {modalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-md">
+        <div className="fixed inset-0 top-0 left-0 w-full h-full z-[100] flex items-center justify-center p-md">
           <button
             type="button"
             className="absolute inset-0 bg-black/60 backdrop-blur-md cursor-default border-none"
             aria-label="Close modal"
             onClick={closeModal}
           />
-          <div className="relative bg-surface-container-lowest border border-outline-variant w-full max-w-md rounded-xl p-xl shadow-2xl">
+          <div
+            className="relative bg-surface-container-lowest border border-outline-variant rounded-xl p-xl md:p-8 shadow-2xl shrink-0 overflow-y-auto custom-scrollbar"
+            style={{ width: "min(700px, 90vw)", maxHeight: "90vh" }}
+          >
             <h2 className="font-headline-lg text-headline-lg text-on-surface mb-lg">
               {editingGoal ? "Edit Goal" : "New Goal"}
             </h2>
@@ -551,13 +522,13 @@ export default function GoalsPage() {
                 >
                   Subtext / Description
                 </label>
-                <input
+                <textarea
                   id="goal-description"
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
-                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-md text-on-surface focus:border-primary focus:ring-0 outline-none"
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-md text-on-surface focus:border-primary focus:ring-0 outline-none resize-none"
                   placeholder="e.g. SWE - Mountain View, CA"
-                  type="text"
+                  rows={3}
                 />
               </div>
 
@@ -660,29 +631,33 @@ export default function GoalsPage() {
                 </span>
               </div>
 
-              <div className="flex gap-md pt-md">
-                {editingGoal ? (
+              <div className="flex justify-between items-center pt-md gap-md border-t border-outline-variant/20 mt-lg">
+                <div>
+                  {editingGoal && (
+                    <button
+                      type="button"
+                      onClick={handleDeleteGoal}
+                      className="py-md px-lg border border-error/40 text-error rounded-lg font-label-md text-label-md hover:bg-error-container/20 transition-colors active:scale-95"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center gap-md">
                   <button
                     type="button"
-                    onClick={handleDeleteGoal}
-                    className="py-lg px-md border border-error/40 text-error rounded-lg font-label-md text-label-md hover:bg-error-container/20 transition-colors"
+                    onClick={closeModal}
+                    className="py-md px-lg border border-outline-variant rounded-lg text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors active:scale-95"
                   >
-                    Delete
+                    Cancel
                   </button>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="flex-1 py-lg border border-outline-variant rounded-lg text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-lg bg-primary text-on-primary rounded-lg font-bold font-label-md text-label-md hover:bg-emerald-400 transition-colors"
-                >
-                  {editingGoal ? "Save" : "Create"}
-                </button>
+                  <button
+                    type="submit"
+                    className="py-md px-xl bg-primary text-on-primary rounded-lg font-bold font-label-md text-label-md hover:bg-emerald-400 transition-colors active:scale-95"
+                  >
+                    {editingGoal ? "Save" : "Create"}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

@@ -5,8 +5,9 @@ export function calculateActivityStreak(
   activityByDate: Record<string, ActivityLevel>,
   today: string = getTodayKey(),
 ): number {
+  const hasToday = (activityByDate[today] ?? 0) > 0;
+  let cursor = hasToday ? today : addDays(today, -1);
   let streak = 0;
-  let cursor = today;
 
   while ((activityByDate[cursor] ?? 0) > 0) {
     streak += 1;
@@ -34,20 +35,7 @@ export function getWeekActivityStatus(
   });
 }
 
-export function seedRecentActivity(
-  days: number,
-  level: ActivityLevel = 2,
-): Record<string, ActivityLevel> {
-  const activity: Record<string, ActivityLevel> = {};
-  let cursor = getTodayKey();
 
-  for (let i = 0; i < days; i += 1) {
-    activity[cursor] = level;
-    cursor = addDays(cursor, -1);
-  }
-
-  return activity;
-}
 
 export function isConsecutiveDay(previousDate: string, currentDate: string): boolean {
   const previous = parseDateKey(previousDate);

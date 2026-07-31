@@ -21,8 +21,8 @@ const SEED_TASKS: Task[] = [
   {
     id: "task-3",
     title: "Update Geetz OS core components",
-    completed: true,
-    priority: "Done",
+    completed: false,
+    priority: "P2",
   },
   {
     id: "task-4",
@@ -33,8 +33,8 @@ const SEED_TASKS: Task[] = [
   ...Array.from({ length: 16 }, (_, index) => ({
     id: `task-seed-${index + 5}`,
     title: `Daily execution task ${index + 5}`,
-    completed: index < 11,
-    priority: (index < 11 ? "Done" : `P${(index % 3) + 1}`) as TaskPriority,
+    completed: false,
+    priority: `P${(index % 3) + 1}` as TaskPriority,
   })),
 ];
 

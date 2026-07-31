@@ -1,13 +1,27 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 interface TopAppBarProps {
   dateTime: string;
 }
 
 export function TopAppBar({ dateTime }: TopAppBarProps) {
+  const [greeting, setGreeting] = useState("Good Morning");
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) setGreeting("Good Morning");
+    else if (hour >= 12 && hour < 17) setGreeting("Good Afternoon");
+    else if (hour >= 17 && hour < 21) setGreeting("Good Evening");
+    else setGreeting("Good Night");
+  }, []);
+
   return (
     <header className="fixed top-0 right-0 w-full md:w-[calc(100%-260px)] z-40 bg-surface/80 backdrop-blur-md border-b border-outline-variant flex justify-between items-center px-container-padding h-16">
       <div className="flex flex-col">
         <h2 className="font-headline-md text-headline-md font-bold text-primary">
-          Good Morning, Alex
+          {greeting}, Geetzzz
         </h2>
         <p
           className="font-label-md text-label-md text-on-surface-variant"

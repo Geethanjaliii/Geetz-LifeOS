@@ -3,18 +3,16 @@
 import { ChecklistRow } from "@/components/dashboard/checklist-row";
 import { useHabitStore } from "@/store/habit-store";
 import { useTaskStore } from "@/store/task-store";
-import type { Task } from "@/types";
-
-const DISPLAY_TASK_IDS = ["task-1", "task-2", "task-3", "task-4"];
+import type { Task, TaskPriority } from "@/types";
 
 function getDisplayTasks(tasks: Task[]): Task[] {
-  const pinned = DISPLAY_TASK_IDS.map((id) =>
-    tasks.find((task) => task.id === id),
-  ).filter((task): task is Task => task !== undefined);
-
-  const additional = tasks.filter((task) => !DISPLAY_TASK_IDS.includes(task.id));
-
-  return [...pinned, ...additional];
+  return [...tasks].sort((a, b) => {
+    if (a.completed !== b.completed) {
+      return a.completed ? 1 : -1;
+    }
+    const priorityWeight: Record<string, number> = { P1: 1, P2: 2, P3: 3, Done: 4 };
+    return (priorityWeight[a.priority] || 2) - (priorityWeight[b.priority] || 2);
+  });
 }
 
 export function TopPriorities() {

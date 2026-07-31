@@ -1,24 +1,12 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import Link from "next/link";
 import { useTaskStore } from "@/store/task-store";
 import { useStoreHydration } from "@/hooks/use-store-hydration";
 import { useLiveClock } from "@/hooks/use-live-clock";
+import { Sidebar } from "@/components/sidebar";
+import { useActivityStore } from "@/store/activity-store";
 import type { Task, TaskPriority } from "@/types";
-
-const NAV_ITEMS = [
-  { href: "/", label: "Dashboard", icon: "dashboard", active: false },
-  { href: "/habits", label: "Habits", icon: "repeat", active: false },
-  { href: "/planner", label: "Planner", icon: "event_note", active: true },
-  { href: "#", label: "Health", icon: "monitor_heart", active: false },
-  { href: "#", label: "Coding", icon: "terminal", active: false },
-  { href: "#", label: "Reading", icon: "menu_book", active: false },
-  { href: "#", label: "Journal", icon: "edit_note", active: false },
-  { href: "#", label: "Calendar", icon: "calendar_today", active: false },
-  { href: "#", label: "Stats", icon: "query_stats", active: false },
-  { href: "#", label: "Settings", icon: "settings", active: false },
-] as const;
 
 const TIMELINE_SLOTS = [
   "08 AM",
@@ -54,6 +42,8 @@ export default function PlannerPage() {
   const [timeRemaining, setTimeRemaining] = useState(1500); // 25 minutes
   const [duration] = useState(1500);
 
+  const incrementFocusSessions = useActivityStore((state) => state.incrementFocusSessions);
+
   // Countdown effect
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
@@ -63,11 +53,12 @@ export default function PlannerPage() {
       }, 1000);
     } else if (timeRemaining === 0) {
       setIsRunning(false);
+      incrementFocusSessions();
     }
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [isRunning, timeRemaining]);
+  }, [isRunning, timeRemaining, incrementFocusSessions]);
 
   // Pomodoro Timer helpers
   const minutes = Math.floor(timeRemaining / 60);
@@ -203,64 +194,7 @@ export default function PlannerPage() {
   return (
     <div className="bg-background text-on-background font-body-md text-body-md overflow-hidden flex h-screen">
       {/* SIDEBAR */}
-      <aside className="w-[260px] h-screen fixed left-0 top-0 bg-surface-container-lowest border-r border-outline-variant flex flex-col py-lg z-50">
-        <div className="px-lg mb-xl">
-          <h1 className="font-headline-md text-headline-md font-bold text-primary">
-            Geetz OS
-          </h1>
-          <p className="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">
-            Elite Performance
-          </p>
-        </div>
-        <nav className="flex-1 overflow-y-auto px-md space-y-xs custom-scrollbar">
-          {NAV_ITEMS.map((item) => {
-            const className = item.active
-              ? "flex items-center gap-md px-md py-sm rounded-lg text-primary font-bold border-r-2 border-primary bg-surface-container-high active:scale-95 transition-transform font-label-md text-label-md"
-              : "flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-200 active:scale-95 transition-transform font-label-md text-label-md";
-
-            const content = (
-              <>
-                <span className="material-symbols-outlined">{item.icon}</span>
-                {item.label}
-              </>
-            );
-
-            if (item.href === "#") {
-              return (
-                <a key={item.label} className={className} href={item.href}>
-                  {content}
-                </a>
-              );
-            }
-
-            return (
-              <Link key={item.label} className={className} href={item.href}>
-                {content}
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="px-md mt-lg">
-          <div className="flex items-center gap-md p-md rounded-xl bg-surface-container hover:bg-surface-container-high cursor-pointer transition-colors group">
-            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                className="w-full h-full object-cover"
-                alt="Profile portrait of Alex Rivera"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDC9B_FVC6OgMK85oo5gAjQIupfwwHFUyYCj7DJy1Nb-lDWwTmMYPWJYNcqBnEZa7kEi3kT4dEwvhehmncQVnyfItAz-qEvAv2sFcVRa2V9or0hM6y1l_PRHSQvZJsLHtu05AAR1LRqsqfn4v4-sNlbi5VOAOjliCuLuP4Y9iZIi2kCLniv1eK7OMHcTR4UD2igtLcC9abk3O7V4Us-pBstQ01xzfz_8tl7tgL1-_ScbDoePxZ5cqx4"
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-label-md text-label-md text-on-surface">
-                Alex Rivera
-              </span>
-              <span className="text-[10px] text-on-surface-variant uppercase tracking-wider">
-                Pro Tier
-              </span>
-            </div>
-          </div>
-        </div>
-      </aside>
+      <Sidebar active="planner" />
 
       {/* MAIN CANVAS */}
       <main className="flex-1 ml-[260px] relative overflow-hidden flex flex-col">
@@ -604,14 +538,14 @@ export default function PlannerPage() {
 
       {/* ADD/EDIT TASK MODAL */}
       {modalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-md">
+        <div className="fixed inset-0 top-0 left-0 w-full h-full z-[100] flex items-center justify-center p-md">
           <button
             type="button"
             className="absolute inset-0 bg-black/60 backdrop-blur-md cursor-default border-none"
             aria-label="Close modal"
             onClick={closeModal}
           />
-          <div className="relative bg-surface-container-lowest border border-outline-variant w-full max-w-md rounded-xl p-xl shadow-2xl">
+          <div className="relative bg-surface-container-lowest border border-outline-variant w-full max-w-md rounded-xl p-xl shadow-2xl shrink-0">
             <h2 className="font-headline-lg text-headline-lg text-on-surface mb-lg">
               {editingTask ? "Edit Task" : "New Task"}
             </h2>

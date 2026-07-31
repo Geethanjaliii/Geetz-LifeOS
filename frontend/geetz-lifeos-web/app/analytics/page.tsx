@@ -11,17 +11,8 @@ import { generateHeatmapGrid } from "@/lib/heatmap";
 import { calculateActivityStreak } from "@/lib/streak";
 import { calculateProductivityScore } from "@/lib/productivity";
 import { calculateGlobalLongestStreak } from "@/lib/habit-stats";
-
-const NAV_ITEMS = [
-  { href: "/", label: "Dashboard", icon: "dashboard", active: false },
-  { href: "/habits", label: "Habits", icon: "repeat", active: false },
-  { href: "/planner", label: "Planner", icon: "event_note", active: false },
-  { href: "/goals", label: "Goals", icon: "emoji_events", active: false },
-  { href: "/analytics", label: "Stats", icon: "query_stats", active: true },
-  { href: "#", label: "Health", icon: "favorite", active: false },
-  { href: "#", label: "Coding", icon: "code", active: false },
-  { href: "#", label: "Settings", icon: "settings", active: false },
-] as const;
+import { Sidebar } from "@/components/sidebar";
+import { getTodayKey } from "@/lib/date";
 
 const WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -34,6 +25,7 @@ export default function AnalyticsPage() {
   const tasks = useTaskStore((state) => state.tasks);
   const goals = useGoalStore((state) => state.goals);
   const activityByDate = useActivityStore((state) => state.activityByDate);
+  const focusSessionsByDate = useActivityStore((state) => state.focusSessionsByDate) || {};
 
   // ----------------------------------------------------
   // METRICS CALCULATIONS
@@ -80,14 +72,13 @@ export default function AnalyticsPage() {
     [activityByDate],
   );
 
-  const focusTimeMinutes = useMemo(
-    () => completedTasks * 27 + completedHabitsToday * 6,
-    [completedTasks, completedHabitsToday],
-  );
+  const today = getTodayKey();
+  const todaySessions = focusSessionsByDate[today] ?? 0;
+  const focusTimeMinutes = todaySessions * 25;
 
   const focusTimeHours = useMemo(() => {
     const hours = focusTimeMinutes / 60;
-    return Number.isInteger(hours) ? `${hours}` : `${hours.toFixed(1)}`;
+    return `${hours.toFixed(1)}`;
   }, [focusTimeMinutes]);
 
   const productivity = useMemo(
@@ -99,6 +90,7 @@ export default function AnalyticsPage() {
         totalHabits,
         currentStreak: activeStreak,
         focusTimeMinutes,
+        averageGoalProgress,
       }),
     [
       completedTasks,
@@ -107,6 +99,7 @@ export default function AnalyticsPage() {
       totalHabits,
       activeStreak,
       focusTimeMinutes,
+      averageGoalProgress,
     ],
   );
 
@@ -126,8 +119,16 @@ export default function AnalyticsPage() {
     [activityByDate],
   );
 
+  const hasRadarData = useMemo(() => {
+    return completedTasks > 0 || completedHabitsToday > 0 || activeStreak > 0 || averageGoalProgress > 0;
+  }, [completedTasks, completedHabitsToday, activeStreak, averageGoalProgress]);
+
   // Radar points for Life Balance (Radar size 100x100, center 50,50)
   const radarPoints = useMemo(() => {
+    if (!hasRadarData) {
+      return "50,50 50,50 50,50 50,50";
+    }
+
     // Health (Habits completion)
     const rHealth = 15 + 30 * (habitCompletionRate / 100);
     // Coding (Tasks completion)
@@ -139,7 +140,7 @@ export default function AnalyticsPage() {
 
     // Points: Up, Right, Down, Left
     return `${50},${50 - rHealth} ${50 + rCoding},${50} ${50},${50 + rSocial} ${50 - rGrowth},${50}`;
-  }, [habitCompletionRate, taskCompletionRate, activeStreak, averageGoalProgress]);
+  }, [hasRadarData, habitCompletionRate, taskCompletionRate, activeStreak, averageGoalProgress]);
 
   // Productivity Trend over the last 9 days
   const trendChartData = useMemo(() => {
@@ -152,7 +153,7 @@ export default function AnalyticsPage() {
       const day = String(d.getDate()).padStart(2, "0");
       const key = `${year}-${month}-${day}`;
 
-      const level = activityByDate[key] ?? 1; // Default to level 1 for baseline display
+      const level = activityByDate[key] ?? 0; // Default to level 0 for baseline display
       const score = level * 25; // 0 to 100
       const x = i * 12.5;
       const y = 200 - (score / 100) * 130; // Max score gives y=70, min y=200
@@ -238,58 +239,12 @@ export default function AnalyticsPage() {
   return (
     <div className="bg-surface-container-lowest text-on-surface font-body-md selection:bg-primary/30 min-h-screen">
       {/* Sidebar Navigation */}
-      <aside className="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest border-r border-outline-variant/20 flex flex-col py-lg px-md gap-sm hidden md:flex z-50">
-        <div className="px-md mb-lg">
-          <Link href="/" className="font-headline-md text-headline-md text-primary tracking-tighter">
-            Geetz OS
-          </Link>
-          <p className="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest mt-1 opacity-70">
-            Elite Performance
-          </p>
-        </div>
-        <nav className="flex-1 flex flex-col gap-1 no-scrollbar overflow-y-auto">
-          {NAV_ITEMS.map((item) => {
-            const className = item.active
-              ? "flex items-center gap-md px-md py-sm rounded-lg bg-secondary-container/20 text-primary border-r-2 border-primary active:translate-x-1 transition-transform font-label-md font-bold"
-              : "flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 font-label-md";
-
-            const content = (
-              <>
-                <span className="material-symbols-outlined">{item.icon}</span>
-                {item.label}
-              </>
-            );
-
-            if (item.href === "#") {
-              return (
-                <a key={item.label} className={className} href={item.href}>
-                  {content}
-                </a>
-              );
-            }
-
-            return (
-              <Link key={item.label} className={className} href={item.href}>
-                {content}
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="mt-auto border-t border-outline-variant/20 pt-md">
-          <Link
-            className="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 font-label-md"
-            href="/"
-          >
-            <span className="material-symbols-outlined">logout</span>
-            Logout
-          </Link>
-        </div>
-      </aside>
+      <Sidebar active="analytics" />
 
       {/* Main Canvas */}
-      <main className="md:ml-64 min-h-screen">
+      <main className="md:ml-[260px] min-h-screen">
         {/* Top App Bar */}
-        <header className="fixed top-0 right-0 left-0 md:left-64 h-16 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 px-lg flex justify-between items-center z-40">
+        <header className="fixed top-0 right-0 left-0 md:left-[260px] h-16 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 px-lg flex justify-between items-center z-40">
           <div className="flex items-center gap-md">
             <h2 className="font-headline-md text-headline-md text-primary font-bold">
               Performance Insights
@@ -466,12 +421,14 @@ export default function AnalyticsPage() {
                     y1="50"
                     y2="50"
                   />
-                  <polygon
-                    fill="rgba(78, 222, 163, 0.2)"
-                    points={radarPoints}
-                    stroke="#4edea3"
-                    strokeWidth="1.5"
-                  />
+                  {hasRadarData && (
+                    <polygon
+                      fill="rgba(78, 222, 163, 0.2)"
+                      points={radarPoints}
+                      stroke="#4edea3"
+                      strokeWidth="1.5"
+                    />
+                  )}
                   <text
                     className="text-[6px] fill-on-surface-variant font-label-md uppercase font-bold"
                     textAnchor="middle"

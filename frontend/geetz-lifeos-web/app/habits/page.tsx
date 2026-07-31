@@ -10,7 +10,7 @@ import { HabitGrid } from "@/components/habits/habit-grid";
 import { HabitMotivationCard } from "@/components/habits/habit-motivation-card";
 import { HabitStats } from "@/components/habits/habit-stats";
 import { HabitTopBar } from "@/components/habits/habit-top-bar";
-import { HabitsSidebar } from "@/components/habits/habits-sidebar";
+import { Sidebar } from "@/components/sidebar";
 import {
   useDashboardSync,
   useDayReset,
@@ -79,7 +79,7 @@ export default function HabitsPage() {
 
   return (
     <>
-      <HabitsSidebar />
+      <Sidebar active="habits" />
       <main className="ml-[260px] flex-1 flex flex-col min-h-screen">
         <HabitTopBar
           searchQuery={searchQuery}

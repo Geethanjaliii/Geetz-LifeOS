@@ -2,21 +2,23 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { getTodayKey } from "@/lib/date";
 import { calculateActivityLevel } from "@/lib/heatmap";
-import { seedRecentActivity } from "@/lib/streak";
 import type { ActivityLevel } from "@/types";
 
 interface ActivityState {
   activityByDate: Record<string, ActivityLevel>;
+  focusSessionsByDate: Record<string, number>;
   syncDailyActivity: (
     completedTasks: number,
     completedHabits: number,
   ) => void;
+  incrementFocusSessions: () => void;
 }
 
 export const useActivityStore = create<ActivityState>()(
   persist(
     (set) => ({
-      activityByDate: seedRecentActivity(14, 2),
+      activityByDate: {},
+      focusSessionsByDate: {},
 
       syncDailyActivity: (completedTasks, completedHabits) => {
         const today = getTodayKey();
@@ -29,6 +31,19 @@ export const useActivityStore = create<ActivityState>()(
           },
         }));
       },
+
+      incrementFocusSessions: () => {
+        const today = getTodayKey();
+        set((state) => {
+          const currentCount = state.focusSessionsByDate?.[today] ?? 0;
+          return {
+            focusSessionsByDate: {
+              ...(state.focusSessionsByDate ?? {}),
+              [today]: currentCount + 1,
+            },
+          };
+        });
+      },
     }),
     {
       name: "geetz-lifeos-activity",
@@ -39,8 +54,14 @@ export const useActivityStore = create<ActivityState>()(
         }
 
         const today = getTodayKey();
+        if (!state.activityByDate) {
+          state.activityByDate = {};
+        }
         if (!state.activityByDate[today]) {
           state.activityByDate[today] = 0;
+        }
+        if (!state.focusSessionsByDate) {
+          state.focusSessionsByDate = {};
         }
       },
     },

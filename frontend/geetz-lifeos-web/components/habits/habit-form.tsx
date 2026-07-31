@@ -105,14 +105,17 @@ export function HabitForm({
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-md">
+    <div className="fixed inset-0 top-0 left-0 w-full h-full z-[100] flex items-center justify-center p-md">
       <button
         type="button"
-        className="absolute inset-0 bg-black/60 backdrop-blur-md"
+        className="absolute inset-0 bg-black/60 backdrop-blur-md cursor-default border-none"
         aria-label="Close modal"
         onClick={onClose}
       />
-      <div className="relative bg-surface-container-lowest border border-outline-variant w-full max-w-md rounded-xl p-xl shadow-2xl">
+      <div
+        className="relative bg-surface-container-lowest border border-outline-variant rounded-xl p-xl md:p-8 shadow-2xl shrink-0 overflow-y-auto custom-scrollbar"
+        style={{ width: "min(650px, 90vw)", maxHeight: "90vh" }}
+      >
         <h2 className="font-headline-lg text-headline-lg text-on-surface mb-lg">
           {isEditing ? "Edit Habit" : "New Habit"}
         </h2>
@@ -120,7 +123,7 @@ export function HabitForm({
           <div className="space-y-xs">
             <label
               htmlFor="habit-title"
-              className="font-label-md text-label-md text-on-surface-variant uppercase"
+              className="font-label-md text-label-md text-on-surface-variant uppercase font-bold"
             >
               Habit Name
             </label>
@@ -140,7 +143,7 @@ export function HabitForm({
             <div className="space-y-xs">
               <label
                 htmlFor="habit-category"
-                className="font-label-md text-label-md text-on-surface-variant uppercase"
+                className="font-label-md text-label-md text-on-surface-variant uppercase font-bold"
               >
                 Category
               </label>
@@ -158,7 +161,7 @@ export function HabitForm({
               </select>
             </div>
             <div className="space-y-xs">
-              <span className="font-label-md text-label-md text-on-surface-variant uppercase">
+              <span className="font-label-md text-label-md text-on-surface-variant uppercase font-bold">
                 Icon
               </span>
               <div className="flex flex-wrap gap-1 bg-surface-container-low border border-outline-variant rounded-lg p-sm max-h-24 overflow-y-auto custom-scrollbar">
@@ -181,7 +184,7 @@ export function HabitForm({
             </div>
           </div>
           <div className="space-y-xs">
-            <span className="font-label-md text-label-md text-on-surface-variant uppercase">
+            <span className="font-label-md text-label-md text-on-surface-variant uppercase font-bold">
               Color
             </span>
             <div className="flex flex-wrap gap-sm">
@@ -201,29 +204,33 @@ export function HabitForm({
               ))}
             </div>
           </div>
-          <div className="flex gap-md pt-md">
-            {isEditing ? (
+          <div className="flex justify-between items-center pt-md gap-md border-t border-outline-variant/20 mt-lg">
+            <div>
+              {isEditing ? (
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="py-md px-lg border border-error/40 text-error rounded-lg font-label-md text-label-md hover:bg-error-container/20 transition-colors active:scale-95"
+                >
+                  Delete
+                </button>
+              ) : null}
+            </div>
+            <div className="flex items-center gap-md">
               <button
                 type="button"
-                onClick={handleDelete}
-                className="py-lg px-md border border-error/40 text-error rounded-lg font-label-md text-label-md hover:bg-error-container/20 transition-colors"
+                onClick={onClose}
+                className="py-md px-lg border border-outline-variant rounded-lg text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors active:scale-95"
               >
-                Delete
+                Cancel
               </button>
-            ) : null}
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-lg border border-outline-variant rounded-lg text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 py-lg bg-primary text-on-primary rounded-lg font-bold font-label-md text-label-md hover:bg-emerald-400 transition-colors"
-            >
-              {isEditing ? "Save Changes" : "Create Habit"}
-            </button>
+              <button
+                type="submit"
+                className="py-md px-xl bg-primary text-on-primary rounded-lg font-bold font-label-md text-label-md hover:bg-emerald-400 transition-colors active:scale-95"
+              >
+                {isEditing ? "Save Changes" : "Create Habit"}
+              </button>
+            </div>
           </div>
         </form>
       </div>
