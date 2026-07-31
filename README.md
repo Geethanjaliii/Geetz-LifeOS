@@ -48,18 +48,6 @@ The project focuses on clean UI, high performance, and scalability using modern 
 - Milestones
 - Deadlines
 
-### 💪 Health
-- Workout tracker
-- Water intake
-- Sleep tracking
-- Weight monitoring
-
-### 💻 Coding
-- Coding sessions
-- Learning tracker
-- Project management
-- Study planner
-
 ### 📊 Analytics
 - Productivity charts
 - Habit analytics
@@ -77,13 +65,6 @@ The project focuses on clean UI, high performance, and scalability using modern 
 - TypeScript
 - Tailwind CSS
 - Zustand
-
-### Future Backend
-
-- FastAPI
-- PostgreSQL
-- Redis
-- JWT Authentication
 
 ### Deployment
 
@@ -166,29 +147,12 @@ npm run start
 - Planner
 - Goals
 - Analytics
-- Health
-- Coding
-
-(Add screenshots here)
-
----
-
-## 🎯 Roadmap
-
-- [x] Dashboard UI
-- [x] Habit UI
-- [x] Planner UI
-- [x] Analytics UI
-- [ ] Authentication
-- [ ] Database Integration
-- [ ] API Development
-- [ ] Notifications
-- [ ] AI Assistant
-- [ ] Mobile Responsive Improvements
-- [ ] Cloud Sync
-- [ ] Offline Support
-
----
+<img width="1878" height="881" alt="image" src="https://github.com/user-attachments/assets/877cc6b3-6aa4-43e5-8645-87626381e212" />
+<img width="1877" height="883" alt="image" src="https://github.com/user-attachments/assets/adf4801d-c98e-4082-8cb6-139351407c94" />
+<img width="1860" height="876" alt="image" src="https://github.com/user-attachments/assets/9b25c280-e0c5-471e-8868-3990336b3c7f" />
+<img width="1905" height="882" alt="image" src="https://github.com/user-attachments/assets/21078abd-bb02-47f5-9fe1-48e8b8160e91" />
+<img width="1547" height="360" alt="image" src="https://github.com/user-attachments/assets/dd847334-e562-405a-89d8-8eb2df33de49" />
+<img width="1858" height="897" alt="image" src="https://github.com/user-attachments/assets/12974ade-c8a4-414f-8fb3-588a8334c809" />
 
 ## 🤝 Contributing
 
