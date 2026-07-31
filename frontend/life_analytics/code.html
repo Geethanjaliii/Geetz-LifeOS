@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Geetz OS | Performance Deep-Dive</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist:wght@400;500&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(23, 23, 23, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(38, 38, 38, 1);
+        }
+        .heatmap-cell {
+            aspect-ratio: 1/1;
+            border-radius: 2px;
+            transition: transform 0.2s ease;
+        }
+        .heatmap-cell:hover {
+            transform: scale(1.2);
+            z-index: 10;
+        }
+        /* Custom scrollbar for sidebar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(78, 222, 163, 0.1); }
+            50% { box-shadow: 0 0 15px rgba(78, 222, 163, 0.3); }
+            100% { box-shadow: 0 0 5px rgba(78, 222, 163, 0.1); }
+        }
+        .active-glow { animation: glow 3s infinite ease-in-out; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-error": "#690005",
+                      "primary": "#4edea3",
+                      "inverse-surface": "#e5e2e1",
+                      "surface-bright": "#3a3939",
+                      "primary-fixed-dim": "#4edea3",
+                      "on-primary-container": "#00422b",
+                      "on-secondary-fixed": "#002114",
+                      "surface-tint": "#4edea3",
+                      "secondary-container": "#00bd85",
+                      "surface-container-highest": "#353534",
+                      "tertiary": "#c0c1ff",
+                      "error-container": "#93000a",
+                      "on-tertiary-fixed": "#07006c",
+                      "on-primary-fixed-variant": "#005236",
+                      "tertiary-fixed": "#e1e0ff",
+                      "on-background": "#e5e2e1",
+                      "surface-container-lowest": "#0e0e0e",
+                      "outline-variant": "#3c4a42",
+                      "on-primary-fixed": "#002113",
+                      "secondary-fixed-dim": "#45dfa4",
+                      "surface": "#131313",
+                      "secondary": "#45dfa4",
+                      "background": "#131313",
+                      "surface-container-low": "#1c1b1b",
+                      "on-tertiary-fixed-variant": "#2f2ebe",
+                      "tertiary-fixed-dim": "#c0c1ff",
+                      "surface-variant": "#353534",
+                      "primary-fixed": "#6ffbbe",
+                      "primary-container": "#10b981",
+                      "on-tertiary-container": "#1d17b2",
+                      "on-secondary": "#003825",
+                      "surface-container": "#201f1f",
+                      "on-tertiary": "#1000a9",
+                      "on-primary": "#003824",
+                      "on-secondary-container": "#00452e",
+                      "inverse-on-surface": "#313030",
+                      "on-surface-variant": "#bbcabf",
+                      "on-secondary-fixed-variant": "#005137",
+                      "error": "#ffb4ab",
+                      "surface-container-high": "#2a2a2a",
+                      "outline": "#86948a",
+                      "on-error-container": "#ffdad6",
+                      "surface-dim": "#131313",
+                      "on-surface": "#e5e2e1",
+                      "tertiary-container": "#9699ff",
+                      "secondary-fixed": "#68fcbf",
+                      "inverse-primary": "#006c49"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xl": "40px",
+                      "gutter": "16px",
+                      "unit": "4px",
+                      "xs": "4px",
+                      "sm": "8px",
+                      "container-padding": "32px",
+                      "md": "16px",
+                      "lg": "24px"
+              },
+              "fontFamily": {
+                      "code": ["Geist"],
+                      "body-lg": ["Inter"],
+                      "display": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "label-md": ["Geist"]
+              },
+              "fontSize": {
+                      "code": ["13px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                      "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "display": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                      "headline-md": ["20px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "label-md": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body-md selection:bg-primary/30">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest border-r border-outline-variant/20 flex flex-col py-lg px-md gap-sm hidden md:flex z-50">
+<div class="px-md mb-lg">
+<h1 class="font-headline-md text-headline-md text-primary tracking-tighter">Geetz OS</h1>
+<p class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest mt-1 opacity-70">Elite Performance</p>
+</div>
+<nav class="flex-1 flex flex-col gap-1 no-scrollbar overflow-y-auto">
+<!-- Stats is active as this is the performance deep-dive -->
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">check_circle</span>
+<span class="font-label-md">Habits</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-label-md">Planner</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg bg-secondary-container/20 text-primary border-r-2 border-primary active:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">query_stats</span>
+<span class="font-label-md">Stats</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-label-md">Health</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">code</span>
+<span class="font-label-md">Coding</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">emoji_events</span>
+<span class="font-label-md">Goals</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-outline-variant/20 pt-md">
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-md">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="md:ml-64 min-h-screen">
+<!-- Top App Bar -->
+<header class="fixed top-0 right-0 left-0 md:left-64 h-16 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 px-lg flex justify-between items-center z-40">
+<div class="flex items-center gap-md">
+<h2 class="font-headline-md text-headline-md text-primary">Performance Insights</h2>
+<div class="hidden sm:flex gap-sm items-center bg-surface-container-low px-sm py-1 rounded-full border border-outline-variant/20">
+<span class="w-2 h-2 rounded-full bg-primary active-glow"></span>
+<span class="text-[10px] font-label-md text-primary">LIVE ENGINE</span>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<div class="hidden lg:flex items-center gap-sm text-on-surface-variant text-label-md">
+<span class="material-symbols-outlined text-[18px]">calendar_month</span>
+<span>JAN 1 — DEC 31, 2024</span>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer">notifications</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/40">
+<img class="w-full h-full object-cover" data-alt="Close up portrait of a professional male software engineer with a minimalist aesthetic, sharp focus, cinematic soft lighting on a charcoal grey studio background, reflecting a high-performance deep-work atmosphere with neutral emerald color grading." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLvE2Yw7NaRHRno9EcuE1RJI56ad6_PGjB-HRfvvJSw-dnxPIH86gY6_WAOoRfDb43WzNzSklwxuj0duPA9O8VU_RNc_P5sEvOxEdWjJmZEcBGMsY4hi247Zoq06lGLKTfpa1LsFcnxsjIfBe_TKeqmp6kt3Ht6nMk15C2GGrN2uNQFRzx7uW2NC8PJC9C08p_CWVFVX3xSoS0pDfdoZ6gwZXzG7uMm_rWGWTajUbi5Lg6Qn3peB07"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="pt-24 pb-12 px-lg max-w-7xl mx-auto space-y-md">
+<!-- Hero Stats Row -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-md">
+<div class="glass-card rounded-[18px] p-lg flex flex-col justify-between h-32">
+<span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Productivity Score</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display text-4xl text-primary">94</span>
+<span class="text-label-md text-primary/60">+2.4%</span>
+</div>
+</div>
+<div class="glass-card rounded-[18px] p-lg flex flex-col justify-between h-32">
+<span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Active Streak</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display text-4xl text-on-surface">18</span>
+<span class="text-label-md text-on-surface-variant">DAYS</span>
+</div>
+</div>
+<div class="glass-card rounded-[18px] p-lg flex flex-col justify-between h-32">
+<span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Focus Hours</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display text-4xl text-on-surface">1,240</span>
+<span class="text-label-md text-on-surface-variant">HRS/YR</span>
+</div>
+</div>
+<div class="glass-card rounded-[18px] p-lg flex flex-col justify-between h-32 border-primary/20">
+<span class="text-label-md font-label-md text-primary uppercase tracking-wider">Success Rate</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display text-4xl text-primary">87%</span>
+<span class="text-label-md text-primary/60">Q4 AVG</span>
+</div>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-md">
+<!-- Yearly Heatmap (GitHub Style) -->
+<div class="lg:col-span-8 glass-card rounded-[18px] p-lg">
+<div class="flex justify-between items-center mb-lg">
+<h3 class="font-headline-md text-headline-md text-on-surface">Contribution Heatmap</h3>
+<div class="flex gap-2 text-[10px] text-on-surface-variant font-label-md items-center">
+<span>Less</span>
+<div class="w-3 h-3 bg-surface-container"></div>
+<div class="w-3 h-3 bg-primary/20"></div>
+<div class="w-3 h-3 bg-primary/50"></div>
+<div class="w-3 h-3 bg-primary/80"></div>
+<div class="w-3 h-3 bg-primary"></div>
+<span>More</span>
+</div>
+</div>
+<div class="overflow-x-auto no-scrollbar">
+<div class="grid grid-flow-col grid-rows-7 gap-1 min-w-[700px]">
+<!-- Generate a full year of 52 weeks -->
+<script>
+                                const heatmapContainer = document.currentScript.parentElement;
+                                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                                
+                                for(let i=0; i < 364; i++) {
+                                    const val = Math.random();
+                                    let colorClass = "bg-surface-container";
+                                    if(val > 0.9) colorClass = "bg-primary";
+                                    else if(val > 0.7) colorClass = "bg-primary/80";
+                                    else if(val > 0.5) colorClass = "bg-primary/50";
+                                    else if(val > 0.3) colorClass = "bg-primary/20";
+                                    
+                                    const div = document.createElement('div');
+                                    div.className = `heatmap-cell ${colorClass} w-3 h-3`;
+                                    heatmapContainer.appendChild(div);
+                                }
+                            </script>
+</div>
+<div class="flex justify-between mt-2 px-1 text-[10px] font-label-md text-on-surface-variant opacity-60">
+<span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
+</div>
+</div>
+</div>
+<!-- Life Balance Radar Chart -->
+<div class="lg:col-span-4 glass-card rounded-[18px] p-lg flex flex-col">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-lg">Life Balance</h3>
+<div class="relative flex-1 flex items-center justify-center py-md">
+<svg class="w-full h-full max-h-[220px]" viewbox="0 0 100 100">
+<!-- Background Circles -->
+<circle class="text-outline-variant/20" cx="50" cy="50" fill="none" r="45" stroke="currentColor" stroke-width="0.5"></circle>
+<circle class="text-outline-variant/20" cx="50" cy="50" fill="none" r="30" stroke="currentColor" stroke-width="0.5"></circle>
+<circle class="text-outline-variant/20" cx="50" cy="50" fill="none" r="15" stroke="currentColor" stroke-width="0.5"></circle>
+<!-- Axis Lines -->
+<line class="text-outline-variant/20" stroke="currentColor" stroke-width="0.5" x1="50" x2="50" y1="5" y2="95"></line>
+<line class="text-outline-variant/20" stroke="currentColor" stroke-width="0.5" x1="5" x2="95" y1="50" y2="50"></line>
+<!-- Radar Polygon (Emerald) -->
+<polygon fill="rgba(78, 222, 163, 0.2)" points="50,15 85,50 50,80 20,50" stroke="#4edea3" stroke-width="1.5"></polygon>
+<!-- Labels -->
+<text class="text-[6px] fill-on-surface-variant font-label-md uppercase" text-anchor="middle" x="50" y="10">Health</text>
+<text class="text-[6px] fill-on-surface-variant font-label-md uppercase" text-anchor="end" x="94" y="52">Coding</text>
+<text class="text-[6px] fill-on-surface-variant font-label-md uppercase" text-anchor="middle" x="50" y="96">Social</text>
+<text class="text-[6px] fill-on-surface-variant font-label-md uppercase" text-anchor="start" x="6" y="52">Growth</text>
+</svg>
+</div>
+<div class="grid grid-cols-2 gap-sm mt-md">
+<div class="flex items-center gap-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="text-[10px] font-label-md text-on-surface-variant uppercase">Health: 8.5</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-primary/70"></span>
+<span class="text-[10px] font-label-md text-on-surface-variant uppercase">Coding: 9.2</span>
+</div>
+</div>
+</div>
+<!-- Productivity Trend Chart -->
+<div class="lg:col-span-12 glass-card rounded-[18px] p-lg">
+<div class="flex justify-between items-end mb-xl">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Productivity Cycles</h3>
+<p class="text-body-md text-on-surface-variant">Weekly performance variance over the last quarter.</p>
+</div>
+<div class="flex bg-surface-container-low p-1 rounded-lg border border-outline-variant/20">
+<button class="px-md py-xs text-[10px] font-label-md uppercase rounded-md hover:bg-surface-container-high transition-all">Week</button>
+<button class="px-md py-xs text-[10px] font-label-md uppercase rounded-md bg-primary text-on-primary">Month</button>
+<button class="px-md py-xs text-[10px] font-label-md uppercase rounded-md hover:bg-surface-container-high transition-all">Year</button>
+</div>
+</div>
+<div class="h-64 w-full relative">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none">
+<defs>
+<lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#4edea3" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#4edea3" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Grid Lines -->
+<line stroke="rgba(255,255,255,0.05)" stroke-width="1" x1="0" x2="100%" y1="20%" y2="20%"></line>
+<line stroke="rgba(255,255,255,0.05)" stroke-width="1" x1="0" x2="100%" y1="40%" y2="40%"></line>
+<line stroke="rgba(255,255,255,0.05)" stroke-width="1" x1="0" x2="100%" y1="60%" y2="60%"></line>
+<line stroke="rgba(255,255,255,0.05)" stroke-width="1" x1="0" x2="100%" y1="80%" y2="80%"></line>
+<!-- Area Fill -->
+<path class="transform scale-y-75 translate-y-24" d="M0,200 L10,180 L20,190 L30,140 L40,160 L50,120 L60,110 L70,150 L80,100 L90,80 L100,90 V256 H0 Z" fill="url(#chartGradient)"></path>
+<!-- Main Path -->
+<path class="transform scale-y-75 translate-y-24" d="M0,200 L10,180 L20,190 L30,140 L40,160 L50,120 L60,110 L70,150 L80,100 L90,80 L100,90" fill="none" stroke="#4edea3" stroke-width="2.5" vector-effect="non-scaling-stroke"></path>
+</svg>
+<!-- X-Axis Labels -->
+<div class="absolute -bottom-6 w-full flex justify-between text-[10px] font-label-md text-on-surface-variant">
+<span>WK 32</span><span>WK 33</span><span>WK 34</span><span>WK 35</span><span>WK 36</span><span>WK 37</span><span>WK 38</span><span>WK 39</span><span>WK 40</span>
+</div>
+</div>
+</div>
+<!-- Best/Worst Day Cards -->
+<div class="lg:col-span-6 glass-card rounded-[18px] overflow-hidden border-primary/20">
+<div class="p-lg bg-primary/5 border-b border-primary/10">
+<div class="flex justify-between items-center">
+<span class="text-label-md font-label-md text-primary uppercase tracking-widest">Peak Performance</span>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1">stars</span>
+</div>
+<h4 class="font-headline-lg text-headline-lg text-on-surface mt-2">Tuesday</h4>
+</div>
+<div class="p-lg space-y-md">
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant font-body-md">Avg. Output Score</span>
+<span class="font-code text-primary">98/100</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant font-body-md">Habit Compliance</span>
+<span class="font-code text-primary">100%</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[98%]"></div>
+</div>
+<p class="text-[12px] italic text-on-surface-variant opacity-70">Optimal window: 07:00 AM - 11:30 AM</p>
+</div>
+</div>
+<div class="lg:col-span-6 glass-card rounded-[18px] overflow-hidden border-error/20">
+<div class="p-lg bg-error/5 border-b border-error/10">
+<div class="flex justify-between items-center">
+<span class="text-label-md font-label-md text-error uppercase tracking-widest">Efficiency Gap</span>
+<span class="material-symbols-outlined text-error">trending_down</span>
+</div>
+<h4 class="font-headline-lg text-headline-lg text-on-surface mt-2">Friday</h4>
+</div>
+<div class="p-lg space-y-md">
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant font-body-md">Avg. Output Score</span>
+<span class="font-code text-error">64/100</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant font-body-md">Habit Compliance</span>
+<span class="font-code text-error">72%</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-error h-full w-[64%]"></div>
+</div>
+<p class="text-[12px] italic text-on-surface-variant opacity-70">Recommended: Shift deep work to Thursday PM</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Mobile Navigation -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface/90 backdrop-blur-xl border-t border-outline-variant/30 flex justify-around items-center z-50">
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-label-md">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">query_stats</span>
+<span class="text-[10px] font-label-md">Stats</span>
+</button>
+<button class="w-12 h-12 -mt-8 bg-primary rounded-full flex items-center justify-center text-on-primary shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">favorite</span>
+<span class="text-[10px] font-label-md">Health</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-label-md">Settings</span>
+</button>
+</nav>
+<script>
+        // Simple micro-interaction for cards
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.borderColor = 'rgba(78, 222, 163, 0.4)';
+                card.style.transition = 'border-color 0.3s ease';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.borderColor = 'rgba(38, 38, 38, 1)';
+            });
+        });
+    </script>
+</body></html>

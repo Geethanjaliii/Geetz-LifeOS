@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Geetz OS - Elite Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Geist:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-card {
+            background: rgba(23, 23, 23, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(38, 38, 38, 1);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: #4edea3;
+            box-shadow: 0 0 15px rgba(78, 222, 163, 0.1);
+        }
+        .emerald-glow {
+            box-shadow: 0 0 20px rgba(78, 222, 163, 0.2);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #262626;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4edea3;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error": "#690005",
+                        "primary": "#4edea3",
+                        "inverse-surface": "#e5e2e1",
+                        "surface-bright": "#3a3939",
+                        "primary-fixed-dim": "#4edea3",
+                        "on-primary-container": "#00422b",
+                        "on-secondary-fixed": "#002114",
+                        "surface-tint": "#4edea3",
+                        "secondary-container": "#00bd85",
+                        "surface-container-highest": "#353534",
+                        "tertiary": "#c0c1ff",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed": "#07006c",
+                        "on-primary-fixed-variant": "#005236",
+                        "tertiary-fixed": "#e1e0ff",
+                        "on-background": "#e5e2e1",
+                        "surface-container-lowest": "#0e0e0e",
+                        "outline-variant": "#3c4a42",
+                        "on-primary-fixed": "#002113",
+                        "secondary-fixed-dim": "#45dfa4",
+                        "surface": "#131313",
+                        "secondary": "#45dfa4",
+                        "background": "#131313",
+                        "surface-container-low": "#1c1b1b",
+                        "on-tertiary-fixed-variant": "#2f2ebe",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "surface-variant": "#353534",
+                        "primary-fixed": "#6ffbbe",
+                        "primary-container": "#10b981",
+                        "on-tertiary-container": "#1d17b2",
+                        "on-secondary": "#003825",
+                        "surface-container": "#201f1f",
+                        "on-tertiary": "#1000a9",
+                        "on-primary": "#003824",
+                        "on-secondary-container": "#00452e",
+                        "inverse-on-surface": "#313030",
+                        "on-surface-variant": "#bbcabf",
+                        "on-secondary-fixed-variant": "#005137",
+                        "error": "#ffb4ab",
+                        "surface-container-high": "#2a2a2a",
+                        "outline": "#86948a",
+                        "on-error-container": "#ffdad6",
+                        "surface-dim": "#131313",
+                        "on-surface": "#e5e2e1",
+                        "tertiary-container": "#9699ff",
+                        "secondary-fixed": "#68fcbf",
+                        "inverse-primary": "#006c49"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "18px",
+                        "xl": "24px",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "40px",
+                        "gutter": "16px",
+                        "unit": "4px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "container-padding": "32px",
+                        "md": "16px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "code": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "code": ["13px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "display": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                        "headline-md": ["20px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-md": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary selection:text-on-primary">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest border-r border-outline-variant/20 flex flex-col py-lg px-md gap-sm z-50">
+<div class="flex items-center gap-md px-md py-sm mb-lg">
+<div class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md text-primary leading-tight">Geetz OS</h1>
+<p class="font-label-md text-label-md opacity-60">Elite Performance</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-md px-md py-3 bg-secondary-container/20 text-primary border-r-2 border-primary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-md py-3 text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">check_circle</span>
+<span class="font-label-md text-label-md">Habits</span>
+</a>
+<a class="flex items-center gap-md px-md py-3 text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-label-md text-label-md">Planner</span>
+</a>
+<a class="flex items-center gap-md px-md py-3 text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-label-md text-label-md">Health</span>
+</a>
+<a class="flex items-center gap-md px-md py-3 text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">code</span>
+<span class="font-label-md text-label-md">Coding</span>
+</a>
+<a class="flex items-center gap-md px-md py-3 text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">emoji_events</span>
+<span class="font-label-md text-label-md">Goals</span>
+</a>
+<a class="flex items-center gap-md px-md py-3 text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">school</span>
+<span class="font-label-md text-label-md">Learning</span>
+</a>
+<a class="flex items-center gap-md px-md py-3 text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-md text-label-md">Journal</span>
+</a>
+<a class="flex items-center gap-md px-md py-3 text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-label-md text-label-md">Finance</span>
+</a>
+<a class="flex items-center gap-md px-md py-3 text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-label-md text-label-md">Stats</span>
+</a>
+<a class="flex items-center gap-md px-md py-3 text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-outline-variant/20 pt-md">
+<a class="flex items-center gap-md px-md py-3 text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-md text-label-md">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 left-64 right-0 h-16 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 flex justify-between items-center px-lg z-40">
+<div class="flex items-center gap-md">
+<div class="relative">
+<span class="absolute inset-y-0 left-3 flex items-center text-on-surface-variant">
+<span class="material-symbols-outlined text-md">search</span>
+</span>
+<input class="bg-surface-container-low border-none rounded-full pl-10 pr-lg py-2 font-body-md text-body-md focus:ring-1 focus:ring-primary w-64" placeholder="Search LifeOS..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<button class="text-on-surface-variant hover:text-primary transition-colors active:scale-95">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors active:scale-95 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<div class="flex items-center gap-sm">
+<img class="w-9 h-9 rounded-full object-cover border border-outline-variant/30" data-alt="A professional studio portrait of a high-performance executive in their late 20s, wearing dark minimalist apparel. The lighting is sophisticated and moody with soft emerald rim highlights. The background is a blurred high-tech workspace with subtle glowing interface elements. Style is ultra-modern, sharp, and clean." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXYPI6suPZskR4WqSCb_6Ow7PcRLAky40AdrI1K9Q6xDsfcZQbBFPtfWFWNlOLV47CT3c0RvYunakdpI2hWazsFDaZzHBUy855N2C8QVHR5ueteQTJtv-xIKtHBAM2g-dvFDyQ4mMIMQNH24Wtg39mCyNV7apgSkoeMjpgINlFvPsOyRDwGLsm4TPtO9UQ3mHXgTj7bzPJCyZBKWqBNnM2IHvc1p5QvRyiNef7aYTKmdjcdK6Kq5uN"/>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="ml-64 pt-24 px-xl pb-xl min-h-screen relative">
+<!-- Atmospheric Background Element -->
+<div class="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
+
+</div>
+<!-- Greeting Section -->
+<section class="mb-xl flex flex-col md:flex-row md:items-end justify-between gap-md">
+<div class="space-y-sm">
+<div class="flex items-center gap-sm">
+<span class="px-3 py-1 bg-primary/10 text-primary font-label-md text-label-md rounded-full">LEVEL 12</span>
+<span class="text-on-surface-variant font-label-md text-label-md">FLOW STATE ACTIVE</span>
+</div>
+<h2 class="font-display text-display text-on-surface tracking-tight">Good Morning, Geetz.</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Tuesday, October 24 — High focus environment recommended.</p>
+</div>
+<div class="w-full md:w-80 bg-surface-container rounded-xl p-md border border-outline-variant/20 glass-card">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-md text-label-md text-primary">XP PROGRESS</span>
+<span class="font-label-md text-label-md opacity-60">7,240 / 10,000</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary emerald-glow" style="width: 72%"></div>
+</div>
+</div>
+</section>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Today's Schedule - Span 4 -->
+<div class="col-span-12 md:col-span-4 glass-card rounded-lg p-lg flex flex-col gap-md">
+<div class="flex justify-between items-center">
+<h3 class="font-headline-md text-headline-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">calendar_today</span>
+                        Schedule
+                    </h3>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-md">more_horiz</span>
+</button>
+</div>
+<div class="space-y-lg relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-outline-variant/30">
+<div class="flex gap-lg relative">
+<div class="w-[24px] h-[24px] rounded-full bg-primary flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[14px] text-on-primary">check</span>
+</div>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-primary">07:00 AM</p>
+<p class="font-headline-md text-[16px] leading-tight mt-1">Deep Work Session 1</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Core Engine Development</p>
+</div>
+</div>
+<div class="flex gap-lg relative">
+<div class="w-[24px] h-[24px] rounded-full bg-surface-container-highest border border-primary flex items-center justify-center z-10">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+</div>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-primary">10:30 AM</p>
+<p class="font-headline-md text-[16px] leading-tight mt-1">Product Sync Meeting</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Reviewing Q4 Architecture</p>
+</div>
+</div>
+<div class="flex gap-lg relative">
+<div class="w-[24px] h-[24px] rounded-full bg-surface-container-highest border border-outline-variant/50 flex items-center justify-center z-10">
+</div>
+<div class="flex-1">
+<p class="font-label-md text-label-md opacity-40">12:30 PM</p>
+<p class="font-headline-md text-[16px] leading-tight mt-1 text-on-surface-variant">Lunch &amp; Recovery</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Central Productivity - Span 5 -->
+<div class="col-span-12 md:col-span-5 grid grid-rows-2 gap-gutter">
+<!-- Habits & Pomodoro -->
+<div class="grid grid-cols-2 gap-gutter">
+<!-- Today's Habits -->
+<div class="glass-card rounded-lg p-lg flex flex-col items-center justify-center gap-md text-center">
+<div class="relative w-28 h-28">
+<svg class="w-full h-full -rotate-90">
+<circle class="text-surface-container-highest" cx="56" cy="56" fill="transparent" r="50" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary emerald-glow" cx="56" cy="56" fill="transparent" r="50" stroke="currentColor" stroke-dasharray="314" stroke-dashoffset="47" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-display text-[24px]">85%</span>
+<span class="font-label-md text-[10px] opacity-60">HABITS</span>
+</div>
+</div>
+<div>
+<p class="font-headline-md text-[16px]">Consistency Peak</p>
+<p class="font-body-md text-body-md text-on-surface-variant">6/7 Completed Today</p>
+</div>
+</div>
+<!-- Pomodoro Progress -->
+<div class="glass-card rounded-lg p-lg flex flex-col gap-md">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">timer</span>
+<span class="font-label-md text-label-md bg-surface-container-high px-2 py-1 rounded">SESSION 3/4</span>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<p class="font-display text-[32px] tracking-widest text-center">21:45</p>
+<p class="font-label-md text-label-md text-center text-primary mt-2">DEEP FOCUS</p>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 py-2 bg-primary text-on-primary font-label-md text-label-md rounded-lg active:scale-95 transition-transform">PAUSE</button>
+<button class="w-10 h-10 flex items-center justify-center border border-outline-variant/30 rounded-lg"><span class="material-symbols-outlined text-[18px]">skip_next</span></button>
+</div>
+</div>
+</div>
+<!-- Coding Hours & Weekly Performance -->
+<div class="grid grid-cols-2 gap-gutter">
+<!-- Coding Hours -->
+<div class="glass-card rounded-lg p-lg flex flex-col gap-sm">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-md text-label-md opacity-60 uppercase">Coding Hours</span>
+<span class="text-primary font-code text-code">6.4h</span>
+</div>
+<div class="flex-1 flex items-end justify-between gap-1">
+<div class="w-full bg-surface-container-high rounded-t-sm transition-all hover:bg-primary" style="height: 40%"></div>
+<div class="w-full bg-surface-container-high rounded-t-sm transition-all hover:bg-primary" style="height: 65%"></div>
+<div class="w-full bg-surface-container-high rounded-t-sm transition-all hover:bg-primary" style="height: 85%"></div>
+<div class="w-full bg-primary rounded-t-sm transition-all hover:bg-primary/80" style="height: 95%"></div>
+<div class="w-full bg-surface-container-high rounded-t-sm transition-all hover:bg-primary" style="height: 30%"></div>
+<div class="w-full bg-surface-container-high rounded-t-sm transition-all hover:bg-primary" style="height: 50%"></div>
+</div>
+</div>
+<!-- Weekly Performance -->
+<div class="glass-card rounded-lg p-lg flex flex-col gap-sm">
+<span class="font-label-md text-label-md opacity-60 uppercase">Weekly Performance</span>
+<div class="flex-1 relative overflow-hidden mt-2">
+<!-- Area chart simplified with SVG -->
+<svg class="w-full h-full" viewbox="0 0 100 40">
+<defs>
+<lineargradient id="areaGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#4edea3" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#4edea3" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path d="M0 40 Q 20 10, 40 25 T 80 15 T 100 5 L 100 40 L 0 40 Z" fill="url(#areaGradient)"></path>
+<path d="M0 40 Q 20 10, 40 25 T 80 15 T 100 5" fill="none" stroke="#4edea3" stroke-width="2"></path>
+</svg>
+</div>
+<div class="flex justify-between items-center mt-2">
+<span class="font-label-md text-label-md text-primary">+12%</span>
+<span class="font-label-md text-label-md opacity-40">vs last week</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Profile & Stats - Span 3 -->
+<div class="col-span-12 md:col-span-3 flex flex-col gap-gutter">
+<!-- Current Streak -->
+<div class="glass-card rounded-lg p-lg flex justify-between items-center">
+<div>
+<p class="font-label-md text-label-md opacity-60">STREAK</p>
+<p class="font-display text-[32px]">24</p>
+<p class="font-label-md text-label-md text-on-surface-variant">DAYS OF FLOW</p>
+</div>
+<div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[40px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+</div>
+<!-- Sleep Score -->
+<div class="glass-card rounded-lg p-lg flex flex-col gap-md">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md opacity-60">SLEEP SCORE</span>
+<span class="material-symbols-outlined text-tertiary">bedtime</span>
+</div>
+<div class="flex items-end gap-md">
+<span class="font-display text-[36px]">88</span>
+<span class="font-body-md text-body-md text-on-surface-variant mb-2">Optimal</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-high rounded-full">
+<div class="h-full bg-tertiary rounded-full" style="width: 88%"></div>
+</div>
+</div>
+<!-- Mood -->
+<div class="glass-card rounded-lg p-lg flex flex-col gap-md">
+<span class="font-label-md text-label-md opacity-60">CURRENT MOOD</span>
+<div class="flex justify-between items-center">
+<button class="p-2 hover:bg-surface-container-high rounded-lg transition-colors text-[20px] opacity-40 hover:opacity-100">😔</button>
+<button class="p-2 hover:bg-surface-container-high rounded-lg transition-colors text-[20px] opacity-40 hover:opacity-100">😐</button>
+<button class="p-2 bg-primary/20 rounded-lg transition-colors text-[24px] border border-primary/30">😊</button>
+<button class="p-2 hover:bg-surface-container-high rounded-lg transition-colors text-[20px] opacity-40 hover:opacity-100">🤩</button>
+<button class="p-2 hover:bg-surface-container-high rounded-lg transition-colors text-[20px] opacity-40 hover:opacity-100">🔥</button>
+</div>
+</div>
+</div>
+<!-- Bottom Row Bento Items -->
+<!-- Top 3 Goals - Span 4 -->
+<div class="col-span-12 md:col-span-4 glass-card rounded-lg p-lg flex flex-col gap-md">
+<h3 class="font-headline-md text-headline-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">emoji_events</span>
+                    Active Goals
+                </h3>
+<div class="space-y-md">
+<div class="p-md rounded-xl bg-surface-container-low border border-outline-variant/10">
+<div class="flex justify-between mb-2">
+<span class="font-label-md text-label-md">Launch Geetz OS v2</span>
+<span class="font-code text-code text-primary">75%</span>
+</div>
+<div class="h-1 w-full bg-surface-container-high rounded-full">
+<div class="h-full bg-primary" style="width: 75%"></div>
+</div>
+</div>
+<div class="p-md rounded-xl bg-surface-container-low border border-outline-variant/10">
+<div class="flex justify-between mb-2">
+<span class="font-label-md text-label-md">Master Three.js</span>
+<span class="font-code text-code text-primary">40%</span>
+</div>
+<div class="h-1 w-full bg-surface-container-high rounded-full">
+<div class="h-full bg-primary" style="width: 40%"></div>
+</div>
+</div>
+<div class="p-md rounded-xl bg-surface-container-low border border-outline-variant/10">
+<div class="flex justify-between mb-2">
+<span class="font-label-md text-label-md">Read 52 Books</span>
+<span class="font-code text-code text-primary">62%</span>
+</div>
+<div class="h-1 w-full bg-surface-container-high rounded-full">
+<div class="h-full bg-primary" style="width: 62%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Reading Progress - Span 5 -->
+<div class="col-span-12 md:col-span-5 glass-card rounded-lg p-lg flex flex-col gap-md">
+<h3 class="font-headline-md text-headline-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">menu_book</span>
+                    Reading Now
+                </h3>
+<div class="flex gap-lg">
+<div class="flex-1 flex gap-md items-start group">
+<div class="w-20 h-28 rounded shadow-lg overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A high-contrast book cover for a title called 'Deep Work' by Cal Newport. The design is minimalist with bold typography and a dark aesthetic, fitting perfectly into an elite technical dashboard. Cinematic lighting with a soft green glow on the edge of the book cover." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJZ7txXGJvqGbr9I6Quq6vNWFtXtLNcTuhqqVbyLroj6iSHTbiVHZBtTTwOXyshSrPq6seVN0u2LiHRvxf_okHQ22x_PIW1ZZlP8tKwXelQMgPdt5u2ULjv23S7eBxr3Q36K6dvGqprtxOwrvh8e_EdfqdaH0b2cWU1GQ7RXA_aj3b28Z6p1W1McTy9aWtEISCuBGDzViier8nOvxiIdlv9bdjIkP0V9l6YTSHgJrNuwn2NWWVkXbm"/>
+</div>
+<div class="flex flex-col justify-center h-full">
+<p class="font-headline-md text-[16px] leading-tight">Deep Work</p>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">Cal Newport</p>
+<div class="w-full">
+<div class="flex justify-between text-[10px] mb-1">
+<span class="font-label-md opacity-40">PROGRESS</span>
+<span class="font-code text-primary">82%</span>
+</div>
+<div class="h-1 w-24 bg-surface-container-high rounded-full">
+<div class="h-full bg-primary" style="width: 82%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex-1 flex gap-md items-start group">
+<div class="w-20 h-28 rounded shadow-lg overflow-hidden flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity">
+<img class="w-full h-full object-cover" data-alt="A book cover for 'Atomic Habits' by James Clear. Vibrant orange and white typography against a clean, technical dark background. Professional book cover photography style, sharp focus, 3D render feel, integrated into a high-end personal OS." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDD3_nUzrjHVcLPZp5ZqqHtz4nkCWhlXTEeWqIlcE9D7jQWwPafMFcmsTLDqbwP70K5SgNk8jMvjhcht2PKr8A9W9bd88rBjs_j-v5Eysqz4mPIZ_4havD8IRY3VNBMrrhceqIMeE_PFd1fGoxNoxCJ7FMdBSd0ZU4m4WBNViUfaQbIB-rLcYJzJfv_3Y80u96YE_yrzs_W8ACGlVL908rgbx8DW55RmOEQ1dBior7vprqHHLnNa8on"/>
+</div>
+<div class="flex flex-col justify-center h-full">
+<p class="font-headline-md text-[16px] leading-tight">Atomic Habits</p>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">James Clear</p>
+<div class="w-full">
+<div class="flex justify-between text-[10px] mb-1">
+<span class="font-label-md opacity-40">PROGRESS</span>
+<span class="font-code text-primary">45%</span>
+</div>
+<div class="h-1 w-24 bg-surface-container-high rounded-full">
+<div class="h-full bg-primary" style="width: 45%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Water Intake - Span 3 -->
+<div class="col-span-12 md:col-span-3 glass-card rounded-lg p-lg flex flex-col items-center justify-between">
+<div class="w-full flex justify-between items-center mb-md">
+<span class="font-label-md text-label-md opacity-60">WATER INTAKE</span>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+</div>
+<div class="relative w-24 h-40 bg-surface-container-high rounded-xl overflow-hidden border border-outline-variant/30">
+<!-- Water Level Animation -->
+<div class="absolute bottom-0 left-0 right-0 bg-primary/40 backdrop-blur-sm transition-all duration-1000 ease-in-out" style="height: 65%">
+<div class="absolute top-0 left-0 right-0 h-2 bg-primary/60"></div>
+</div>
+<div class="absolute inset-0 flex flex-col items-center justify-center z-10">
+<span class="font-display text-[24px]">1.8L</span>
+<span class="font-label-md text-[10px] opacity-60">GOAL 2.5L</span>
+</div>
+</div>
+<button class="mt-md w-full py-2 border border-primary/30 text-primary hover:bg-primary/10 rounded-lg font-label-md text-label-md transition-all active:scale-95">
+                    ADD 250ML
+                </button>
+</div>
+</div>
+</main>
+<!-- Interactive FAB -->
+<button class="fixed bottom-lg right-lg w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 emerald-glow">
+<span class="material-symbols-outlined">add_task</span>
+</button>
+<script>
+        // Simple micro-interactions
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0px)';
+            });
+        });
+
+        // Time Update
+        function updateTime() {
+            const now = new Date();
+            // This could be displayed in the UI if needed
+        }
+        setInterval(updateTime, 60000);
+        updateTime();
+    </script>
+</body></html>

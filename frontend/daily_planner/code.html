@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Planner | Geetz OS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(23, 23, 23, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid #262626;
+        }
+        .emerald-glow:hover {
+            box-shadow: 0 0 15px rgba(78, 222, 163, 0.1);
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #262626;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3c4a42;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#9699ff",
+                      "inverse-surface": "#e5e2e1",
+                      "secondary-fixed": "#68fcbf",
+                      "secondary-fixed-dim": "#45dfa4",
+                      "surface-tint": "#4edea3",
+                      "on-tertiary-container": "#1d17b2",
+                      "tertiary": "#c0c1ff",
+                      "on-primary-fixed": "#002113",
+                      "on-secondary-fixed": "#002114",
+                      "outline": "#86948a",
+                      "primary": "#4edea3",
+                      "on-tertiary": "#1000a9",
+                      "on-secondary": "#003825",
+                      "surface-dim": "#131313",
+                      "primary-fixed-dim": "#4edea3",
+                      "inverse-primary": "#006c49",
+                      "primary-fixed": "#6ffbbe",
+                      "on-surface-variant": "#bbcabf",
+                      "on-primary": "#003824",
+                      "outline-variant": "#3c4a42",
+                      "on-error-container": "#ffdad6",
+                      "primary-container": "#10b981",
+                      "on-error": "#690005",
+                      "surface-container-high": "#2a2a2a",
+                      "surface-variant": "#353534",
+                      "on-background": "#e5e2e1",
+                      "error-container": "#93000a",
+                      "error": "#ffb4ab",
+                      "secondary-container": "#00bd85",
+                      "background": "#131313",
+                      "tertiary-fixed-dim": "#c0c1ff",
+                      "on-primary-fixed-variant": "#005236",
+                      "on-secondary-container": "#00452e",
+                      "surface-container-highest": "#353534",
+                      "surface-container-lowest": "#0e0e0e",
+                      "surface-bright": "#3a3939",
+                      "surface": "#131313",
+                      "on-tertiary-fixed-variant": "#2f2ebe",
+                      "surface-container": "#201f1f",
+                      "inverse-on-surface": "#313030",
+                      "surface-container-low": "#1c1b1b",
+                      "on-tertiary-fixed": "#07006c",
+                      "on-secondary-fixed-variant": "#005137",
+                      "tertiary-fixed": "#e1e0ff",
+                      "on-surface": "#e5e2e1",
+                      "secondary": "#45dfa4",
+                      "on-primary-container": "#00422b"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "container-padding": "32px",
+                      "sm": "8px",
+                      "xs": "4px",
+                      "unit": "4px",
+                      "xl": "40px",
+                      "lg": "24px",
+                      "md": "16px"
+              },
+              "fontFamily": {
+                      "label-md": ["Geist"],
+                      "headline-lg-mobile": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "display": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "code": ["Geist"]
+              },
+              "fontSize": {
+                      "label-md": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "display": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                      "headline-md": ["20px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "body-lg": ["16px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                      "code": ["13px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md overflow-hidden flex h-screen">
+<!-- SIDEBAR -->
+<aside class="w-[260px] h-screen fixed left-0 top-0 bg-surface-container-lowest border-r border-outline-variant flex flex-col py-lg z-50">
+<div class="px-lg mb-xl">
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Geetz OS</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">Elite Performance</p>
+</div>
+<nav class="flex-1 overflow-y-auto px-md space-y-xs">
+<!-- Navigation Items Mapping -->
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-200 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-200 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">repeat</span>
+<span class="font-label-md text-label-md">Habits</span>
+</a>
+<!-- Active Tab: Planner -->
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-primary font-bold border-r-2 border-primary bg-surface-container-high transition-colors duration-200 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">event_note</span>
+<span class="font-label-md text-label-md">Planner</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-200 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">monitor_heart</span>
+<span class="font-label-md text-label-md">Health</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-200 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-label-md text-label-md">Coding</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-200 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-md text-label-md">Reading</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-200 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="font-label-md text-label-md">Journal</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-200 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-label-md text-label-md">Calendar</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-200 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-label-md text-label-md">Stats</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-200 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</nav>
+<div class="px-md mt-lg">
+<div class="flex items-center gap-md p-md rounded-xl bg-surface-container hover:bg-surface-container-high cursor-pointer transition-colors group">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a software architect in his 30s with a focused and calm expression. He is wearing a minimalist dark turtleneck against a deep charcoal background with soft emerald rim lighting that highlights his silhouette. The aesthetic is clean, technical, and high-performance, mirroring a modern developer-focused OS interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDC9B_FVC6OgMK85oo5gAjQIupfwwHFUyYCj7DJy1Nb-lDWwTmMYPWJYNcqBnEZa7kEi3kT4dEwvhehmncQVnyfItAz-qEvAv2sFcVRa2V9or0hM6y1l_PRHSQvZJsLHtu05AAR1LRqsqfn4v4-sNlbi5VOAOjliCuLuP4Y9iZIi2kCLniv1eK7OMHcTR4UD2igtLcC9abk3O7V4Us-pBstQ01xzfz_8tl7tgL1-_ScbDoePxZ5cqx4"/>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Alex Rivera</span>
+<span class="text-[10px] text-on-surface-variant uppercase tracking-wider">Pro Tier</span>
+</div>
+<span class="material-symbols-outlined ml-auto text-on-surface-variant group-hover:text-primary transition-colors">account_circle</span>
+</div>
+</div>
+</aside>
+<!-- MAIN CANVAS -->
+<main class="flex-1 ml-[260px] relative overflow-hidden flex flex-col">
+<!-- TOP APP BAR -->
+<header class="fixed top-0 right-0 w-[calc(100%-260px)] z-40 bg-surface/80 backdrop-blur-md border-b border-outline-variant flex justify-between items-center px-container-padding h-16">
+<div class="flex items-center gap-md">
+<h2 class="font-headline-md text-headline-md font-bold text-primary">Daily Planner</h2>
+<div class="h-4 w-px bg-outline-variant mx-sm"></div>
+<span class="font-label-md text-label-md text-on-surface-variant">Wednesday, Oct 25</span>
+</div>
+<div class="flex items-center gap-lg">
+<div class="flex items-center gap-md">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors active:opacity-80">
+<span class="material-symbols-outlined">search</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors relative active:opacity-80">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+</div>
+<button class="bg-primary text-on-primary font-bold py-2 px-lg rounded-xl hover:bg-primary-fixed transition-colors active:scale-95 flex items-center gap-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    Quick Add
+                </button>
+</div>
+</header>
+<!-- CONTENT AREA -->
+<div class="mt-16 p-container-padding overflow-y-auto h-[calc(100vh-64px)] grid grid-cols-12 gap-lg bg-surface-container-lowest/20">
+<!-- LEFT COLUMN: FOCUS & POMODORO -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-lg">
+<!-- POMODORO WIDGET -->
+<div class="glass-card rounded-[18px] p-lg flex flex-col items-center justify-center relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-md opacity-20 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined cursor-pointer hover:text-primary">settings</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-[0.2em] mb-md">Deep Work Session</h3>
+<div class="relative w-48 h-48 flex items-center justify-center mb-lg">
+<!-- Progress Ring -->
+<svg class="w-full h-full transform -rotate-90">
+<circle cx="96" cy="96" fill="transparent" r="88" stroke="#262626" stroke-width="4"></circle>
+<circle cx="96" cy="96" fill="transparent" r="88" stroke="#4edea3" stroke-dasharray="552.92" stroke-dashoffset="138" stroke-width="4" style="filter: drop-shadow(0 0 4px rgba(78, 222, 163, 0.4)); transition: stroke-dashoffset 1s linear;"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="font-display text-display text-primary leading-none">25:00</span>
+<span class="font-label-md text-label-md text-on-surface-variant mt-1">Pomodoro</span>
+</div>
+</div>
+<div class="flex gap-md w-full">
+<button class="flex-1 bg-primary text-on-primary font-bold py-3 rounded-xl hover:bg-primary-fixed transition-colors active:scale-95">
+                            START
+                        </button>
+<button class="w-12 h-12 flex items-center justify-center border border-outline-variant rounded-xl hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">restart_alt</span>
+</button>
+</div>
+</div>
+<!-- DAILY GOALS -->
+<div class="glass-card rounded-[18px] p-lg flex-1">
+<div class="flex justify-between items-center mb-lg">
+<h3 class="font-headline-md text-headline-md">Daily Goals</h3>
+<span class="font-label-md text-label-md text-primary">2/4 Done</span>
+</div>
+<ul class="space-y-md">
+<li class="flex items-start gap-md group">
+<button class="mt-1 w-5 h-5 rounded border-2 border-primary bg-primary flex items-center justify-center text-on-primary transition-all">
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</button>
+<div>
+<p class="font-body-md text-body-md line-through text-on-surface-variant">Complete Beta UI Mockups</p>
+<span class="font-label-md text-label-md text-on-surface-variant/50">High Priority</span>
+</div>
+</li>
+<li class="flex items-start gap-md group">
+<button class="mt-1 w-5 h-5 rounded border-2 border-primary bg-primary flex items-center justify-center text-on-primary transition-all">
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</button>
+<div>
+<p class="font-body-md text-body-md line-through text-on-surface-variant">Architecture Review Session</p>
+<span class="font-label-md text-label-md text-on-surface-variant/50">Engineering</span>
+</div>
+</li>
+<li class="flex items-start gap-md group">
+<button class="mt-1 w-5 h-5 rounded border-2 border-outline-variant hover:border-primary transition-all"></button>
+<div>
+<p class="font-body-md text-body-md text-on-surface">Finalize API Documentation</p>
+<span class="font-label-md text-label-md text-primary">Drafting</span>
+</div>
+</li>
+<li class="flex items-start gap-md group">
+<button class="mt-1 w-5 h-5 rounded border-2 border-outline-variant hover:border-primary transition-all"></button>
+<div>
+<p class="font-body-md text-body-md text-on-surface">Weekly Team Sync</p>
+<span class="font-label-md text-label-md text-on-surface-variant/50">Internal</span>
+</div>
+</li>
+</ul>
+<div class="mt-lg pt-lg border-t border-outline-variant">
+<p class="font-label-md text-label-md text-on-surface-variant mb-sm">NOTES</p>
+<div class="bg-surface-container-low p-md rounded-xl text-on-surface-variant text-[13px] italic border-l-2 border-primary">
+                            "Focus on the core functionality first. The secondary features can wait until Friday's sprint review. Keep the emerald palette consistent."
+                        </div>
+</div>
+</div>
+</div>
+<!-- CENTER COLUMN: TIMELINE -->
+<div class="col-span-12 lg:col-span-4 flex flex-col">
+<div class="glass-card rounded-[18px] p-lg flex flex-col h-full">
+<div class="flex justify-between items-center mb-lg">
+<h3 class="font-headline-md text-headline-md">Timeline</h3>
+<div class="flex gap-xs">
+<button class="p-1 rounded hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>
+<button class="p-1 rounded hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto pr-md space-y-0 relative">
+<!-- Current Time Indicator -->
+<div class="absolute left-0 right-0 border-t border-primary/40 flex items-center z-10" style="top: 260px;">
+<div class="bg-primary text-on-primary text-[10px] px-2 py-0.5 rounded-full absolute -top-3 -left-2 font-bold shadow-lg">11:15 AM</div>
+</div>
+<!-- Timeline Slots -->
+<div class="grid grid-cols-6 border-b border-outline-variant/30 py-4 group hover:bg-surface-container-high/20 transition-colors">
+<div class="col-span-1 text-on-surface-variant font-label-md">08 AM</div>
+<div class="col-span-5 relative">
+<div class="bg-surface-container border border-outline-variant p-md rounded-xl text-on-surface-variant italic">Morning Routine</div>
+</div>
+</div>
+<div class="grid grid-cols-6 border-b border-outline-variant/30 py-4 group hover:bg-surface-container-high/20 transition-colors">
+<div class="col-span-1 text-on-surface-variant font-label-md">09 AM</div>
+<div class="col-span-5 relative">
+<div class="bg-primary-container/20 border-l-4 border-primary p-md rounded-r-xl">
+<p class="font-bold text-primary">UI Component Build</p>
+<span class="text-[12px] opacity-70">Deep Focus</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-6 border-b border-outline-variant/30 py-4 group hover:bg-surface-container-high/20 transition-colors">
+<div class="col-span-1 text-on-surface-variant font-label-md">10 AM</div>
+<div class="col-span-5 relative">
+<div class="bg-primary-container/20 border-l-4 border-primary p-md rounded-r-xl">
+<p class="font-bold text-primary">UI Component Build</p>
+<span class="text-[12px] opacity-70">Cont.</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-6 border-b border-outline-variant/30 py-4 group hover:bg-surface-container-high/20 transition-colors">
+<div class="col-span-1 text-on-surface-variant font-label-md">11 AM</div>
+<div class="col-span-5 relative">
+<div class="h-16 border-2 border-dashed border-outline-variant rounded-xl flex items-center justify-center text-on-surface-variant/40">
+<span class="material-symbols-outlined mr-sm">add_circle</span> New Entry
+                                </div>
+</div>
+</div>
+<div class="grid grid-cols-6 border-b border-outline-variant/30 py-4 group hover:bg-surface-container-high/20 transition-colors">
+<div class="col-span-1 text-on-surface-variant font-label-md">12 PM</div>
+<div class="col-span-5 relative">
+<div class="bg-tertiary-container/20 border-l-4 border-tertiary p-md rounded-r-xl">
+<p class="font-bold text-tertiary">Lunch Break</p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-6 border-b border-outline-variant/30 py-4 group hover:bg-surface-container-high/20 transition-colors">
+<div class="col-span-1 text-on-surface-variant font-label-md">01 PM</div>
+<div class="col-span-5 relative">
+<div class="bg-secondary-container/20 border-l-4 border-secondary p-md rounded-r-xl">
+<p class="font-bold text-secondary">Stakeholder Sync</p>
+<span class="text-[12px] opacity-70">Meeting</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-6 border-b border-outline-variant/30 py-4 group hover:bg-surface-container-high/20 transition-colors">
+<div class="col-span-1 text-on-surface-variant font-label-md">02 PM</div>
+<div class="col-span-5 relative">
+<div class="h-12 flex items-center px-md text-on-surface-variant/40 italic">No scheduled tasks</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: TASKS -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-lg overflow-hidden">
+<div class="glass-card rounded-[18px] p-lg h-full flex flex-col">
+<div class="flex justify-between items-center mb-lg">
+<h3 class="font-headline-md text-headline-md">Task Backlog</h3>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary">filter_list</span>
+</div>
+<div class="flex-1 overflow-y-auto space-y-md pr-md">
+<!-- Priority High -->
+<div class="bg-surface-container-low border border-outline-variant p-md rounded-xl hover:border-primary transition-all emerald-glow cursor-pointer">
+<div class="flex justify-between items-start mb-sm">
+<span class="bg-error-container/20 text-error text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter">High Priority</span>
+<span class="text-on-surface-variant font-label-md">2:00 PM</span>
+</div>
+<h4 class="font-bold text-on-surface mb-xs">Refactor Navigation Logic</h4>
+<p class="text-[12px] text-on-surface-variant line-clamp-2">The sidebar state needs to be managed globally to ensure smooth transitions between screens.</p>
+<div class="mt-md flex items-center gap-sm">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border-2 border-surface bg-surface-container-high flex items-center justify-center text-[10px]">JD</div>
+<div class="w-6 h-6 rounded-full border-2 border-surface bg-primary flex items-center justify-center text-[10px] text-on-primary">ME</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px] ml-auto">attach_file</span>
+<span class="text-[10px] text-on-surface-variant">3</span>
+</div>
+</div>
+<!-- Priority Medium -->
+<div class="bg-surface-container-low border border-outline-variant p-md rounded-xl hover:border-primary transition-all emerald-glow cursor-pointer">
+<div class="flex justify-between items-start mb-sm">
+<span class="bg-primary-container/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter">In Progress</span>
+<span class="text-on-surface-variant font-label-md">4:30 PM</span>
+</div>
+<h4 class="font-bold text-on-surface mb-xs">Color Palette Audit</h4>
+<p class="text-[12px] text-on-surface-variant line-clamp-2">Ensure all emerald tones align with the Obsidian styling guide across all components.</p>
+</div>
+<!-- Priority Low -->
+<div class="bg-surface-container-low border border-outline-variant p-md rounded-xl hover:border-primary transition-all emerald-glow cursor-pointer">
+<div class="flex justify-between items-start mb-sm">
+<span class="bg-outline-variant text-on-surface-variant text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter">Low Priority</span>
+<span class="text-on-surface-variant font-label-md">Tomorrow</span>
+</div>
+<h4 class="font-bold text-on-surface mb-xs">Clean up SVG Assets</h4>
+<p class="text-[12px] text-on-surface-variant">Optimize icons for production release.</p>
+</div>
+<!-- More tasks... -->
+<div class="bg-surface-container-low border border-outline-variant p-md rounded-xl hover:border-primary transition-all opacity-60">
+<div class="flex justify-between items-start mb-sm">
+<span class="bg-outline-variant text-on-surface-variant text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter">Backlog</span>
+</div>
+<h4 class="font-bold text-on-surface mb-xs">Update Privacy Policy</h4>
+</div>
+</div>
+<button class="mt-lg w-full border border-dashed border-outline-variant py-3 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined">add</span>
+                        Add New Task
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB (Suppressed on Planner per instructions, but kept as a visual anchor if needed for specific actions) -->
+<!-- Instruction says suppress FAB on specific screens like details/settings. Planner is a main dashboard destination. -->
+<button class="fixed bottom-lg right-lg w-16 h-16 bg-primary text-on-primary rounded-full shadow-2xl shadow-primary/20 flex items-center justify-center active:scale-95 transition-transform z-50 group">
+<span class="material-symbols-outlined text-[32px] group-hover:rotate-90 transition-transform duration-300">add</span>
+</button>
+<script>
+        // Micro-interactions for the Timer
+        let isRunning = false;
+        const startBtn = document.querySelector('button.bg-primary');
+        const timerText = document.querySelector('.text-display');
+        
+        startBtn.addEventListener('click', () => {
+            isRunning = !isRunning;
+            startBtn.innerText = isRunning ? 'PAUSE' : 'START';
+            startBtn.classList.toggle('bg-primary');
+            startBtn.classList.toggle('bg-error-container');
+            startBtn.classList.toggle('text-on-error-container');
+        });
+
+        // Simple animation for the progress ring
+        let progress = 138;
+        const circle = document.querySelector('circle[stroke-dashoffset]');
+        
+        setInterval(() => {
+            if(isRunning && progress > 0) {
+                progress -= 0.1;
+                circle.style.strokeDashoffset = progress;
+            }
+        }, 100);
+
+        // Hover effects for tasks
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+                card.style.transition = 'transform 0.2s ease-out';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0px)';
+            });
+        });
+    </script>
+</body></html>

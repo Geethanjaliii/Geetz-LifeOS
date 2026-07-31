@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Geetz OS | Learning Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist:wght@400;500&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-effect {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #262626;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3a3939;
+        }
+        .emerald-glow {
+            box-shadow: 0 0 15px -3px rgba(78, 222, 163, 0.15);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-error": "#690005",
+                      "primary": "#4edea3",
+                      "inverse-surface": "#e5e2e1",
+                      "surface-bright": "#3a3939",
+                      "primary-fixed-dim": "#4edea3",
+                      "on-primary-container": "#00422b",
+                      "on-secondary-fixed": "#002114",
+                      "surface-tint": "#4edea3",
+                      "secondary-container": "#00bd85",
+                      "surface-container-highest": "#353534",
+                      "tertiary": "#c0c1ff",
+                      "error-container": "#93000a",
+                      "on-tertiary-fixed": "#07006c",
+                      "on-primary-fixed-variant": "#005236",
+                      "tertiary-fixed": "#e1e0ff",
+                      "on-background": "#e5e2e1",
+                      "surface-container-lowest": "#0e0e0e",
+                      "outline-variant": "#3c4a42",
+                      "on-primary-fixed": "#002113",
+                      "secondary-fixed-dim": "#45dfa4",
+                      "surface": "#131313",
+                      "secondary": "#45dfa4",
+                      "background": "#131313",
+                      "surface-container-low": "#1c1b1b",
+                      "on-tertiary-fixed-variant": "#2f2ebe",
+                      "tertiary-fixed-dim": "#c0c1ff",
+                      "surface-variant": "#353534",
+                      "primary-fixed": "#6ffbbe",
+                      "primary-container": "#10b981",
+                      "on-tertiary-container": "#1d17b2",
+                      "on-secondary": "#003825",
+                      "surface-container": "#201f1f",
+                      "on-tertiary": "#1000a9",
+                      "on-primary": "#003824",
+                      "on-secondary-container": "#00452e",
+                      "inverse-on-surface": "#313030",
+                      "on-surface-variant": "#bbcabf",
+                      "on-secondary-fixed-variant": "#005137",
+                      "error": "#ffb4ab",
+                      "surface-container-high": "#2a2a2a",
+                      "outline": "#86948a",
+                      "on-error-container": "#ffdad6",
+                      "surface-dim": "#131313",
+                      "on-surface": "#e5e2e1",
+                      "tertiary-container": "#9699ff",
+                      "secondary-fixed": "#68fcbf",
+                      "inverse-primary": "#006c49"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xl": "40px",
+                      "gutter": "16px",
+                      "unit": "4px",
+                      "xs": "4px",
+                      "sm": "8px",
+                      "container-padding": "32px",
+                      "md": "16px",
+                      "lg": "24px"
+              },
+              "fontFamily": {
+                      "code": ["Geist"],
+                      "body-lg": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "display": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "label-md": ["Geist"]
+              },
+              "fontSize": {
+                      "code": ["13px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                      "body-lg": ["16px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "display": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                      "headline-md": ["20px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                      "label-md": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface selection:bg-primary/30 selection:text-primary">
+<!-- TopNavBar Implementation -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 flex justify-between items-center px-lg h-16 w-full">
+<div class="flex items-center gap-md">
+<span class="font-display text-display text-primary tracking-tighter text-headline-md">Geetz OS</span>
+<div class="hidden md:flex ml-lg gap-md">
+<div class="relative group">
+<input class="bg-surface-container-low border border-outline-variant/30 rounded-lg px-md py-xs text-body-md focus:outline-none focus:border-primary transition-all w-64" placeholder="Search resources..." type="text"/>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer active:scale-95 transition-all">add</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer active:scale-95 transition-all">notifications</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a software engineer in a high-tech dark-themed workspace. The lighting is moody with subtle emerald green highlights casting a futuristic glow. The style is minimalist and clean, representing elite performance and intellectual focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCNqQzAakXqBWWM8URgSU3GNm0LqeGIoTT9OaWlfuOD5oeI_8sG2BayXUHnKgpRL2lGx8lEkNCguv6hk9KqSLJk2bgFcqLeREXinYNMa-wppMudZVPA8WaCE0CqkfydswXn6DSpRXjAKd5dOBGkm451ML0j93NJmPiQf3s3Wtq1Ap3iIyU1W8tNTbZmIn-fmiIIMaEiJl8kaDZSg7vDnWP4kgKiC1QH4H6lzYdtijiq3Lz81QiMcKx"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar Implementation -->
+<nav class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest border-r border-outline-variant/20 flex flex-col py-lg px-md gap-sm hidden md:flex pt-20">
+<div class="flex flex-col gap-xs mb-lg">
+<div class="flex items-center gap-sm px-md py-sm">
+<div class="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">school</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-primary leading-none">Learning</h2>
+<p class="font-label-md text-label-md text-on-surface-variant">Elite Performance</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1 overflow-y-auto">
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg bg-secondary-container/20 text-primary border-r-2 border-primary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">school</span>
+<span class="font-label-md text-label-md">Learning</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">check_circle</span>
+<span class="font-label-md text-label-md">Habits</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-label-md text-label-md">Planner</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">code</span>
+<span class="font-label-md text-label-md">Coding</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-label-md text-label-md">Stats</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</div>
+<div class="mt-auto pt-lg border-t border-outline-variant/10">
+<button class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all w-full text-left">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-md text-label-md">Logout</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 pt-20 px-container-padding pb-xl min-h-screen">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-lg mb-xl">
+<div>
+<p class="text-primary font-label-md text-label-md uppercase tracking-widest mb-xs">Continuous Growth</p>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Knowledge Matrix</h1>
+</div>
+<div class="flex gap-md">
+<button class="px-lg py-sm bg-primary text-background font-label-md text-label-md rounded-lg flex items-center gap-sm transition-all hover:bg-primary-container active:scale-95">
+<span class="material-symbols-outlined text-[20px]">add_task</span>
+                    New Enrollment
+                </button>
+</div>
+</div>
+<!-- Learning Stats (Bento-style Grid) -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-xl">
+<div class="bg-surface-container-low border border-outline-variant/30 rounded-[18px] p-lg flex flex-col gap-sm">
+<span class="material-symbols-outlined text-primary">schedule</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase">Study Hours</p>
+<p class="font-headline-lg text-headline-lg text-on-surface">128.5<span class="text-body-md text-on-surface-variant ml-xs">hrs</span></p>
+</div>
+<div class="flex items-center gap-xs text-primary">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="font-label-md text-label-md">+12% from last month</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant/30 rounded-[18px] p-lg flex flex-col gap-sm">
+<span class="material-symbols-outlined text-primary">book</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase">Resources Consumed</p>
+<p class="font-headline-lg text-headline-lg text-on-surface">14</p>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant">8 Courses, 6 Books</p>
+</div>
+<div class="bg-surface-container-low border border-outline-variant/30 rounded-[18px] p-lg flex flex-col gap-sm">
+<span class="material-symbols-outlined text-primary">verified</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase">Certifications</p>
+<p class="font-headline-lg text-headline-lg text-on-surface">3</p>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant">2 Pending Exam</p>
+</div>
+<div class="bg-surface-container-low border border-outline-variant/30 rounded-[18px] p-lg flex flex-col gap-sm relative overflow-hidden">
+<div class="relative z-10">
+<span class="material-symbols-outlined text-primary">hourglass_empty</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase">Est. Completion</p>
+<p class="font-headline-lg text-headline-lg text-on-surface">Oct 24</p>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant">Based on current velocity</p>
+</div>
+<!-- Mini Heatmap visualization in background -->
+<div class="absolute bottom-0 right-0 p-sm opacity-20 flex gap-[2px]">
+<div class="flex flex-col gap-[2px]">
+<div class="w-2 h-2 rounded-sm bg-primary"></div>
+<div class="w-2 h-2 rounded-sm bg-primary/40"></div>
+<div class="w-2 h-2 rounded-sm bg-surface-container-highest"></div>
+</div>
+<div class="flex flex-col gap-[2px]">
+<div class="w-2 h-2 rounded-sm bg-primary/60"></div>
+<div class="w-2 h-2 rounded-sm bg-primary"></div>
+<div class="w-2 h-2 rounded-sm bg-primary/20"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Active Courses Section -->
+<section class="mb-xl">
+<div class="flex items-center justify-between mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">play_circle</span>
+                    Active Courses
+                </h2>
+<a class="text-primary font-label-md text-label-md hover:underline" href="#">View All</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Advanced React Card -->
+<div class="bg-surface-container border border-outline-variant/30 rounded-[18px] overflow-hidden group hover:border-primary/50 transition-all duration-300">
+<div class="h-40 relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A dark, high-contrast abstract digital art representation of React.js logo components floating in a 3D space with neon emerald green glowing wires connecting them. The background is a deep charcoal texture, conveying a sophisticated technical course environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYCUStcX913fTYEqGBZovLJXXRxnRer1H4qQWC_F0V2dm9SWEKeNqV2VL88hjDQeYD9W7IP6IQ-lHKnw8YyhbvTLyjY4zXc-7saYnJ7jW1G3abN3ZA-MJGP3-fynBY4QCjdbyzatLluKTXP7UJdOgk3rRR6KqBCSDsbYrYMuM526vTypjjHFSfKN2EfWCeGOxB7fDVnlRkdzFlOTOK-i0KQDPD-gD5pFGg346t0HmRGya1WQrICS8d"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container to-transparent"></div>
+<span class="absolute top-md right-md bg-background/60 backdrop-blur-md px-sm py-xs rounded-lg font-label-md text-label-md text-primary">High Priority</span>
+</div>
+<div class="p-lg">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">Advanced React</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-lg">Design Patterns & Performance Optimization</p>
+<div class="space-y-sm">
+<div class="flex justify-between font-label-md text-label-md">
+<span class="text-on-surface-variant">Progress</span>
+<span class="text-primary">85%</span>
+</div>
+<div class="w-full h-2 bg-outline-variant/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary emerald-glow" style="width: 85%"></div>
+</div>
+</div>
+<div class="mt-lg flex items-center justify-between">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border border-background bg-surface-container-highest flex items-center justify-center text-[10px]">JS</div>
+<div class="w-6 h-6 rounded-full border border-background bg-surface-container-highest flex items-center justify-center text-[10px]">TS</div>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">arrow_forward</button>
+</div>
+</div>
+</div>
+<!-- System Design Card -->
+<div class="bg-surface-container border border-outline-variant/30 rounded-[18px] overflow-hidden group hover:border-primary/50 transition-all duration-300">
+<div class="h-40 relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Conceptual visualization of distributed systems and network architecture. Abstract glowing emerald lines connecting nodes in a dark web-like structure. The atmosphere is complex and professional, suggesting a high-level software engineering course. Sharp technical aesthetics with deep charcoal contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9sQJwC_8elQ_xjh2C9o4tGe__bRF4FtNVz_L8YhoHU-IujvKVfVmnWyLQoN2-lt-nlcRkscACHjvm6VUWWZltoDpkuudER5v_5B1Ik-lp7ScrhqXgEPImWdmpMcYbAllmyIqD4gQ87GVhK-CRrJ_Ietmse14yLie5CLREIhiDr27hhH2-8ztCLp1j-xNHHkV6h037cMOykrz_pKQBJnjs_ETpF0U-1D8MoefI1Jp6VbardMMvFCuy"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container to-transparent"></div>
+</div>
+<div class="p-lg">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">System Design</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-lg">Scalability, Availability & Reliability</p>
+<div class="space-y-sm">
+<div class="flex justify-between font-label-md text-label-md">
+<span class="text-on-surface-variant">Progress</span>
+<span class="text-primary">20%</span>
+</div>
+<div class="w-full h-2 bg-outline-variant/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary emerald-glow" style="width: 20%"></div>
+</div>
+</div>
+<div class="mt-lg flex items-center justify-between">
+<span class="text-on-surface-variant font-label-md text-label-md">12 Lessons Left</span>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">arrow_forward</button>
+</div>
+</div>
+</div>
+<!-- Empty/Placeholder Card -->
+<div class="border-2 border-dashed border-outline-variant/30 rounded-[18px] flex flex-col items-center justify-center p-lg group hover:border-primary/30 transition-all cursor-pointer">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center mb-md group-hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-all">library_add</span>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant">Explore New Courses</p>
+</div>
+</div>
+</section>
+<!-- Resource Library & Notes (Split View) -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-xl">
+<!-- Videos/Library -->
+<div class="lg:col-span-2">
+<div class="flex items-center justify-between mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">video_library</span>
+                        Resource Library
+                    </h2>
+<div class="flex gap-sm">
+<button class="p-1 rounded-md bg-surface-container-high border border-outline-variant/30 material-symbols-outlined text-[18px]">grid_view</button>
+<button class="p-1 rounded-md text-on-surface-variant material-symbols-outlined text-[18px]">list</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="bg-surface-container-low border border-outline-variant/30 rounded-xl p-md flex gap-md items-center hover:bg-surface-container transition-colors cursor-pointer">
+<div class="w-20 h-20 rounded-lg bg-surface-container-highest flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-3xl">play_circle</span>
+</div>
+<div class="flex flex-col gap-1">
+<h4 class="font-body-lg text-body-lg text-on-surface font-semibold line-clamp-1">Microservices Patterns</h4>
+<p class="font-label-md text-label-md text-on-surface-variant">Video Tutorial • 45m</p>
+<div class="flex items-center gap-xs mt-1">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-label-md text-label-md text-primary">Watching</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant/30 rounded-xl p-md flex gap-md items-center hover:bg-surface-container transition-colors cursor-pointer">
+<div class="w-20 h-20 rounded-lg bg-surface-container-highest flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl">article</span>
+</div>
+<div class="flex flex-col gap-1">
+<h4 class="font-body-lg text-body-lg text-on-surface font-semibold line-clamp-1">K8s Orchestration</h4>
+<p class="font-label-md text-label-md text-on-surface-variant">Whitepaper • 12 Pages</p>
+<span class="font-label-md text-label-md text-on-surface-variant mt-1">Unread</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant/30 rounded-xl p-md flex gap-md items-center hover:bg-surface-container transition-colors cursor-pointer">
+<div class="w-20 h-20 rounded-lg bg-surface-container-highest flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl">headphones</span>
+</div>
+<div class="flex flex-col gap-1">
+<h4 class="font-body-lg text-body-lg text-on-surface font-semibold line-clamp-1">Productivity Habits</h4>
+<p class="font-label-md text-label-md text-on-surface-variant">Audiobook • 6h 20m</p>
+<span class="font-label-md text-label-md text-on-surface-variant mt-1">Finished</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant/30 rounded-xl p-md flex gap-md items-center hover:bg-surface-container transition-colors cursor-pointer">
+<div class="w-20 h-20 rounded-lg bg-surface-container-highest flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl">folder_zip</span>
+</div>
+<div class="flex flex-col gap-1">
+<h4 class="font-body-lg text-body-lg text-on-surface font-semibold line-clamp-1">Assets Pack V2</h4>
+<p class="font-label-md text-label-md text-on-surface-variant">Source Files • 1.2 GB</p>
+<span class="font-label-md text-label-md text-on-surface-variant mt-1">Downloaded</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Learning Notes -->
+<div>
+<div class="flex items-center justify-between mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">edit_note</span>
+                        Recent Notes
+                    </h2>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">post_add</button>
+</div>
+<div class="flex flex-col gap-md">
+<div class="p-md bg-surface-container-low border-l-2 border-primary rounded-r-xl">
+<div class="flex justify-between items-start mb-xs">
+<h5 class="font-body-md text-body-md text-on-surface font-bold">State Management in React</h5>
+<span class="text-[10px] text-on-surface-variant uppercase font-label-md">2h ago</span>
+</div>
+<p class="text-body-md text-body-md text-on-surface-variant line-clamp-2 italic">"Focusing on the difference between Server State and Client State using Tanstack Query..."</p>
+</div>
+<div class="p-md bg-surface-container-low border-l-2 border-outline-variant/30 rounded-r-xl">
+<div class="flex justify-between items-start mb-xs">
+<h5 class="font-body-md text-body-md text-on-surface font-bold">System Reliability Metrics</h5>
+<span class="text-[10px] text-on-surface-variant uppercase font-label-md">Yesterday</span>
+</div>
+<p class="text-body-md text-body-md text-on-surface-variant line-clamp-2">"SLOs vs SLIs vs SLAs. Key takeaway: SLOs are the internal targets..."</p>
+</div>
+<div class="p-md bg-surface-container-low border-l-2 border-outline-variant/30 rounded-r-xl">
+<div class="flex justify-between items-start mb-xs">
+<h5 class="font-body-md text-body-md text-on-surface font-bold">SQL Indexing Strategies</h5>
+<span class="text-[10px] text-on-surface-variant uppercase font-label-md">Sep 12</span>
+</div>
+<p class="text-body-md text-body-md text-on-surface-variant line-clamp-2">"B-Trees vs Hash indexes. When to use partial indexes for better performance..."</p>
+</div>
+<button class="w-full py-sm border border-outline-variant/30 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-primary hover:border-primary transition-all">Open Notebook</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Mobile Bottom Navigation -->
+<div class="md:hidden fixed bottom-0 left-0 w-full bg-surface/90 backdrop-blur-xl border-t border-outline-variant/30 flex justify-around items-center py-sm z-50">
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-[10px]">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">school</span>
+<span class="font-label-md text-[10px]">Learn</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-md text-[10px]">Library</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-[10px]">Profile</span>
+</button>
+</div>
+<!-- Floating Micro-interaction Script -->
+<script>
+        document.querySelectorAll('.active\\:scale-95').forEach(btn => {
+            btn.addEventListener('mousedown', () => btn.classList.add('scale-95'));
+            btn.addEventListener('mouseup', () => btn.classList.remove('scale-95'));
+            btn.addEventListener('mouseleave', () => btn.classList.remove('scale-95'));
+        });
+
+        // Simple scroll reveal for cards
+        const cards = document.querySelectorAll('.bg-surface-container, .bg-surface-container-low');
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        cards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+            observer.observe(card);
+        });
+    </script>
+</body></html>
