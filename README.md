@@ -7,8 +7,6 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
----
-
 ## 📖 Overview
 
 Geetz-LifeOS is a modern productivity platform designed to become a complete digital operating system for personal growth.
