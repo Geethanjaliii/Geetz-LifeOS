@@ -44,30 +44,23 @@ The project focuses on clean UI, high performance, and scalability using modern 
 - Milestones
 - Deadlines
 
-### 📊 Analytics
+### 📊Analytics
 - Productivity charts
 - Habit analytics
 - Weekly reports
 - Performance insights
 
 ---
-
-## 🛠 Tech Stack
-
+## 🛠Tech Stack
 ### Frontend
-
 - Next.js 16
 - React 19
 - TypeScript
 - Tailwind CSS
 - Zustand
-
 ### Deployment
-
 - Vercel
-
 ---
-
 ## 📂 Project Structure
 
 ```
