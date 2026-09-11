@@ -1,4 +1,4 @@
-# 🚀 Geetz-LifeOS
+# 🚀Geetz-LifeOS
 
 > An AI-powered personal operating system to manage productivity, habits, goals, health, learning, and life from one beautiful dashboard.
 
@@ -15,16 +15,16 @@ Instead of using multiple apps for habits, goals, notes, planner, health trackin
 
 The project focuses on clean UI, high performance, and scalability using modern web technologies.
 
-## ✨ Features
+## ✨Features
 
-### 🏠 Dashboard
+### 🏠Dashboard
 - Productivity overview
 - Daily progress
 - Focus score
 - Quick actions
 - Recent activity
 
-### ✅ Habit Tracker
+### ✅Habit Tracker
 - Daily habit completion
 - Monthly heatmap
 - Habit streaks
