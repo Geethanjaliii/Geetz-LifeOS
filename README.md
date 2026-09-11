@@ -15,8 +15,6 @@ Instead of using multiple apps for habits, goals, notes, planner, health trackin
 
 The project focuses on clean UI, high performance, and scalability using modern web technologies.
 
----
-
 ## ✨ Features
 
 ### 🏠 Dashboard
