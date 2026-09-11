@@ -31,14 +31,14 @@ The project focuses on clean UI, high performance, and scalability using modern 
 - Completion statistics
 - Category management
 
-### 📅 Planner
+### 📅Planner
 - Daily planner
 - Weekly planner
 - Tasks
 - Notes
 - Calendar integration
 
-### 🎯 Goals
+### 🎯Goals
 - Goal management
 - Progress tracking
 - Milestones
